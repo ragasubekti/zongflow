@@ -1,0 +1,9 @@
+# List of files containing translatable strings
+src/i18n.rs
+src/settings/imp.rs
+src/convert/imp.rs
+resources/settings.ui
+resources/window.ui
+resources/translate.ui
+resources/convert.ui
+resources/library.ui

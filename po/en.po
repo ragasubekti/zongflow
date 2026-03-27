@@ -1,0 +1,302 @@
+# Zongflow translations
+# Language: en_US
+msgid ""
+msgstr ""
+"Project-Id-Version: zongflow 0.1.0\n"
+"POT-Creation-Date: 2026-03-27 12:00+0000\n"
+"PO-Revision-Date: 2026-03-27 12:00+0000\n"
+"Last-Translator: Auto Generated\n"
+"Language-Team: Zongflow Translators\n"
+"Language: en_US\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Fluent key: about
+msgid "ABOUT"
+msgstr "About"
+
+#. Fluent key: app-title
+msgid "APP_TITLE"
+msgstr "Zongflow"
+
+#. Fluent key: application-information
+msgid "APPLICATION_INFORMATION"
+msgstr "Application information"
+
+#. Fluent key: application-language
+msgid "APPLICATION_LANGUAGE"
+msgstr "Application language"
+
+#. Fluent key: apply
+msgid "APPLY"
+msgstr "Apply"
+
+#. Fluent key: back
+msgid "BACK"
+msgstr "Back"
+
+#. Fluent key: cancel
+msgid "CANCEL"
+msgstr "_Cancel"
+
+#. Fluent key: choose
+msgid "CHOOSE"
+msgstr "Choose"
+
+#. Fluent key: clear
+msgid "CLEAR"
+msgstr "Clear"
+
+#. Fluent key: clear-cache
+msgid "CLEAR_CACHE"
+msgstr "Clear Cache"
+
+#. Fluent key: clear-database
+msgid "CLEAR_DATABASE"
+msgstr "Clear Database"
+
+#. Fluent key: close
+msgid "CLOSE"
+msgstr "Close"
+
+#. Fluent key: confirm
+msgid "CONFIRM"
+msgstr "Confirm"
+
+#. Fluent key: convert
+msgid "CONVERT"
+msgstr "Convert"
+
+#. Fluent key: copyright
+msgid "COPYRIGHT"
+msgstr "© 2026 Zongflow"
+
+#. Fluent key: dark-mode
+msgid "DARK_MODE"
+msgstr "Dark Mode"
+
+#. Fluent key: delete
+msgid "DELETE"
+msgstr "Delete"
+
+#. Fluent key: delete-temporary-files
+msgid "DELETE_TEMPORARY_FILES"
+msgstr "Delete temporary files"
+
+#. Fluent key: done
+msgid "DONE"
+msgstr "Done"
+
+#. Fluent key: edit
+msgid "EDIT"
+msgstr "Edit"
+
+#. Fluent key: epub-files
+msgid "EPUB_FILES"
+msgstr "EPUB files"
+
+#. Fluent key: error-occurred
+msgid "ERROR_OCCURRED"
+msgstr "An error occurred"
+
+#. Fluent key: error-scanning
+msgid "ERROR_SCANNING"
+msgstr "Error scanning: { $error }"
+
+#. Fluent key: found-documents
+msgid "FOUND_DOCUMENTS"
+msgstr "Found { $count } documents"
+
+#. Fluent key: general
+msgid "GENERAL"
+msgstr "General"
+
+#. Fluent key: grid-view
+msgid "GRID_VIEW"
+msgstr "Grid View"
+
+#. Fluent key: just-now
+msgid "JUST_NOW"
+msgstr "Just now"
+
+#. Fluent key: lang-en-us
+msgid "LANG_EN_US"
+msgstr "English (US)"
+
+#. Fluent key: lang-ja-jp
+msgid "LANG_JA_JP"
+msgstr "Japanese"
+
+#. Fluent key: lang-zh-cn
+msgid "LANG_ZH_CN"
+msgstr "Chinese (Simplified)"
+
+#. Fluent key: language
+msgid "LANGUAGE"
+msgstr "Language"
+
+#. Fluent key: library
+msgid "LIBRARY"
+msgstr "Library"
+
+#. Fluent key: list-view
+msgid "LIST_VIEW"
+msgstr "List View"
+
+#. Fluent key: loading
+msgid "LOADING"
+msgstr "Loading..."
+
+#. Fluent key: maintenance
+msgid "MAINTENANCE"
+msgstr "Maintenance"
+
+#. Fluent key: markdown-files
+msgid "MARKDOWN_FILES"
+msgstr "Markdown files"
+
+#. Fluent key: next
+msgid "NEXT"
+msgstr "Next"
+
+#. Fluent key: no-parent-window
+msgid "NO_PARENT_WINDOW"
+msgstr "No parent window"
+
+#. Fluent key: no-selection
+msgid "NO_SELECTION"
+msgstr "No selection"
+
+#. Fluent key: ok
+msgid "OK"
+msgstr "OK"
+
+#. Fluent key: open
+msgid "OPEN"
+msgstr "_Open"
+
+#. Fluent key: output-folder
+msgid "OUTPUT_FOLDER"
+msgstr "Output Folder"
+
+#. Fluent key: pick-directory
+msgid "PICK_DIRECTORY"
+msgstr "Pick Directory"
+
+#. Fluent key: pick-file
+msgid "PICK_FILE"
+msgstr "Pick File"
+
+#. Fluent key: remove-all-library-data
+msgid "REMOVE_ALL_LIBRARY_DATA"
+msgstr "Remove all library data"
+
+#. Fluent key: reset
+msgid "RESET"
+msgstr "Reset"
+
+#. Fluent key: reset-settings
+msgid "RESET_SETTINGS"
+msgstr "Reset Settings"
+
+#. Fluent key: restore-defaults
+msgid "RESTORE_DEFAULTS"
+msgstr "Restore defaults"
+
+#. Fluent key: save
+msgid "SAVE"
+msgstr "Save"
+
+#. Fluent key: save-as
+msgid "SAVE_AS"
+msgstr "Save As"
+
+#. Fluent key: select-directory
+msgid "SELECT_DIRECTORY"
+msgstr "Select Directory"
+
+#. Fluent key: select-file
+msgid "SELECT_FILE"
+msgstr "Select File"
+
+#. Fluent key: select-files-or-directories
+msgid "SELECT_FILES_OR_DIRECTORIES"
+msgstr "Select files or directories to convert"
+
+#. Fluent key: select-folder
+msgid "SELECT_FOLDER"
+msgstr "Select Folder"
+
+#. Fluent key: select-output-folder
+msgid "SELECT_OUTPUT_FOLDER"
+msgstr "Select Output Folder"
+
+#. Fluent key: selected-files
+msgid "SELECTED_FILES"
+msgstr "Selected: { $count }"
+
+#. Fluent key: selected-folder
+msgid "SELECTED_FOLDER"
+msgstr "Selected folder: { $path }"
+
+#. Fluent key: success
+msgid "SUCCESS"
+msgstr "Success"
+
+#. Fluent key: text-files
+msgid "TEXT_FILES"
+msgstr "Text files"
+
+#. Fluent key: today
+msgid "TODAY"
+msgstr "Today"
+
+#. Fluent key: translate
+msgid "TRANSLATE"
+msgstr "Translate"
+
+#. Fluent key: translation-coming-soon
+msgid "TRANSLATION_COMING_SOON"
+msgstr "Translation feature coming soon"
+
+#. Fluent key: use-dark-theme
+msgid "USE_DARK_THEME"
+msgstr "Use dark theme"
+
+#. Fluent key: version
+msgid "VERSION"
+msgstr "0.1.0"
+
+#. Fluent key: where-converted-saved
+msgid "WHERE_CONVERTED_SAVED"
+msgstr "Where converted files are saved"
+
+#. Fluent key: yesterday
+msgid "YESTERDAY"
+msgstr "Yesterday"
+
+#. New keys for settings changes
+msgid "SETTINGS_CHANGED_MESSAGE"
+msgstr "Settings have changed. Press Save to apply."
+
+msgid "SETTINGS_SAVED_MESSAGE"
+msgstr "Settings saved successfully."
+
+msgid "SETTINGS_RESET_MESSAGE"
+msgstr "Settings reset to defaults."
+
+msgid "CACHE_CLEARED_MESSAGE"
+msgstr "Cache cleared successfully."
+
+msgid "DATABASE_CLEARED_MESSAGE"
+msgstr "Database cleared successfully."
+
+msgid "UNSAVED_CHANGES_MESSAGE"
+msgstr "You have unsaved changes. Press Save to apply."
+
+msgid "SETTINGS"
+msgstr "Settings"
+
+msgid "PATH_NOT_ALLOWED"
+msgstr "Selected path is outside your home directory."

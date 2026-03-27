@@ -1,0 +1,304 @@
+# Zongflow translations
+# Language: ja_JP
+msgid ""
+msgstr ""
+"Project-Id-Version: zongflow 0.1.0\n"
+"POT-Creation-Date: 2026-03-27 12:00+0000\n"
+"PO-Revision-Date: 2026-03-27 12:00+0000\n"
+"Last-Translator: Auto Generated\n"
+"Language-Team: Zongflow Translators\n"
+"Language: ja_JP\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Fluent key: about
+msgid "ABOUT"
+msgstr "情報"
+
+#. Fluent key: app-title
+msgid "APP_TITLE"
+msgstr "Zongflow"
+
+#. Fluent key: application-information
+msgid "APPLICATION_INFORMATION"
+msgstr "アプリケーション情報"
+
+#. Fluent key: application-language
+msgid "APPLICATION_LANGUAGE"
+msgstr "アプリケーションの言語"
+
+#. Fluent key: apply
+msgid "APPLY"
+msgstr "Apply"
+
+#. Fluent key: back
+msgid "BACK"
+msgstr "Back"
+
+#. Fluent key: cancel
+msgid "CANCEL"
+msgstr "キャンセル(_C)"
+
+#. Fluent key: choose
+msgid "CHOOSE"
+msgstr "選択"
+
+#. Fluent key: clear
+msgid "CLEAR"
+msgstr "クリア"
+
+#. Fluent key: clear-cache
+msgid "CLEAR_CACHE"
+msgstr "キャッシュをクリア"
+
+#. Fluent key: clear-database
+msgid "CLEAR_DATABASE"
+msgstr "データベースをクリア"
+
+#. Fluent key: close
+msgid "CLOSE"
+msgstr "Close"
+
+#. Fluent key: confirm
+msgid "CONFIRM"
+msgstr "Confirm"
+
+#. Fluent key: convert
+msgid "CONVERT"
+msgstr "変換"
+
+#. Fluent key: copyright
+msgid "COPYRIGHT"
+msgstr "© 2026 Zongflow"
+
+#. Fluent key: dark-mode
+msgid "DARK_MODE"
+msgstr "ダークモード"
+
+#. Fluent key: delete
+msgid "DELETE"
+msgstr "Delete"
+
+#. Fluent key: delete-temporary-files
+msgid "DELETE_TEMPORARY_FILES"
+msgstr "一時ファイルを削除"
+
+#. Fluent key: done
+msgid "DONE"
+msgstr "Done"
+
+#. Fluent key: edit
+msgid "EDIT"
+msgstr "Edit"
+
+#. Fluent key: epub-files
+msgid "EPUB_FILES"
+msgstr "EPUBファイル"
+
+#. Fluent key: error-occurred
+msgid "ERROR_OCCURRED"
+msgstr "An error occurred"
+
+#. Fluent key: error-scanning
+msgid "ERROR_SCANNING"
+msgstr "スキャンエラー: { $error }"
+
+#. Fluent key: found-documents
+msgid "FOUND_DOCUMENTS"
+msgstr "{ $count } 個のドキュメントが見つかりました"
+
+#. Fluent key: general
+msgid "GENERAL"
+msgstr "一般"
+
+#. Fluent key: grid-view
+msgid "GRID_VIEW"
+msgstr "グリッド表示"
+
+#. Fluent key: just-now
+msgid "JUST_NOW"
+msgstr "Just now"
+
+#. Fluent key: lang-en-us
+msgid "LANG_EN_US"
+msgstr "英語（アメリカ）"
+
+#. Fluent key: lang-ja-jp
+msgid "LANG_JA_JP"
+msgstr "日本語"
+
+#. Fluent key: lang-zh-cn
+msgid "LANG_ZH_CN"
+msgstr "中国語（簡体字）"
+
+#. Fluent key: language
+msgid "LANGUAGE"
+msgstr "言語"
+
+#. Fluent key: library
+msgid "LIBRARY"
+msgstr "ライブラリ"
+
+#. Fluent key: list-view
+msgid "LIST_VIEW"
+msgstr "リスト表示"
+
+#. Fluent key: loading
+msgid "LOADING"
+msgstr "Loading..."
+
+#. Fluent key: maintenance
+msgid "MAINTENANCE"
+msgstr "保守"
+
+#. Fluent key: markdown-files
+msgid "MARKDOWN_FILES"
+msgstr "Markdownファイル"
+
+#. Fluent key: next
+msgid "NEXT"
+msgstr "Next"
+
+#. Fluent key: no-parent-window
+msgid "NO_PARENT_WINDOW"
+msgstr "親ウィンドウなし"
+
+#. Fluent key: no-selection
+msgid "NO_SELECTION"
+msgstr "No selection"
+
+#. Fluent key: ok
+msgid "OK"
+msgstr "OK"
+
+#. Fluent key: open
+msgid "OPEN"
+msgstr "開く(_O)"
+
+#. Fluent key: output-folder
+msgid "OUTPUT_FOLDER"
+msgstr "出力フォルダー"
+
+#. Fluent key: pick-directory
+msgid "PICK_DIRECTORY"
+msgstr "ディレクトリを選択"
+
+#. Fluent key: pick-file
+msgid "PICK_FILE"
+msgstr "ファイルを選択"
+
+#. Fluent key: remove-all-library-data
+msgid "REMOVE_ALL_LIBRARY_DATA"
+msgstr "すべてのライブラリデータを削除"
+
+#. Fluent key: reset
+msgid "RESET"
+msgstr "リセット"
+
+#. Fluent key: reset-settings
+msgid "RESET_SETTINGS"
+msgstr "設定をリセット"
+
+#. Fluent key: restore-defaults
+msgid "RESTORE_DEFAULTS"
+msgstr "デフォルトに復元"
+
+#. Fluent key: save
+msgid "SAVE"
+msgstr "Save"
+
+#. Fluent key: save-as
+msgid "SAVE_AS"
+msgstr "Save As"
+
+#. Fluent key: select-directory
+msgid "SELECT_DIRECTORY"
+msgstr "ディレクトリを選択"
+
+#. Fluent key: select-file
+msgid "SELECT_FILE"
+msgstr "ファイルを選択"
+
+#. Fluent key: select-files-or-directories
+msgid "SELECT_FILES_OR_DIRECTORIES"
+msgstr "変換するファイルまたはディレクトリを選択"
+
+#. Fluent key: select-folder
+msgid "SELECT_FOLDER"
+msgstr "Select Folder"
+
+#. Fluent key: select-output-folder
+msgid "SELECT_OUTPUT_FOLDER"
+msgstr "出力フォルダーを選択"
+
+#. Fluent key: selected-files
+msgid "SELECTED_FILES"
+msgstr "選択済み: { $count }"
+
+#. Fluent key: selected-folder
+msgid "SELECTED_FOLDER"
+msgstr "選択されたフォルダー: { $path }"
+
+#. Fluent key: success
+msgid "SUCCESS"
+msgstr "Success"
+
+#. Fluent key: text-files
+msgid "TEXT_FILES"
+msgstr "テキストファイル"
+
+#. Fluent key: today
+msgid "TODAY"
+msgstr "Today"
+
+#. Fluent key: translate
+msgid "TRANSLATE"
+msgstr "翻訳"
+
+#. Fluent key: translation-coming-soon
+msgid "TRANSLATION_COMING_SOON"
+msgstr "翻訳機能は近日公開予定"
+
+#. Fluent key: use-dark-theme
+msgid "USE_DARK_THEME"
+msgstr "ダークテーマを使用"
+
+#. Fluent key: version
+msgid "VERSION"
+msgstr "0.1.0"
+
+#. Fluent key: where-converted-saved
+msgid "WHERE_CONVERTED_SAVED"
+msgstr "変換されたファイルの保存場所"
+
+#. Fluent key: yesterday
+msgid "YESTERDAY"
+msgstr "Yesterday"
+
+
+#. New keys for settings changes
+msgid "SETTINGS_CHANGED_MESSAGE"
+msgstr "設定が変更されました。保存ボタンを押して適用してください。"
+
+msgid "SETTINGS_SAVED_MESSAGE"
+msgstr "設定が正常に保存されました。"
+
+msgid "SETTINGS_RESET_MESSAGE"
+msgstr "設定がデフォルトにリセットされました。"
+
+msgid "CACHE_CLEARED_MESSAGE"
+msgstr "キャッシュが正常にクリアされました。"
+
+msgid "DATABASE_CLEARED_MESSAGE"
+msgstr "データベースが正常にクリアされました。"
+
+msgid "UNSAVED_CHANGES_MESSAGE"
+msgstr "保存されていない変更があります。保存ボタンを押して適用してください。"
+
+msgid "SETTINGS"
+msgstr "設定"
+
+msgid "PATH_NOT_ALLOWED"
+msgstr "選択されたパスはホームディレクトリ外にあります。"
+

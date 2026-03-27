@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <interface domain="zongflow">
+  <template class="LibraryWidget" parent="GtkBox">
+    <property name="visible">True</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="orientation">vertical</property>
+    <property name="spacing">12</property>
+    <child>
+      <object class="GtkLabel" id="title_label">
+        <property name="label" translatable="yes">Library</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkStack" id="view_stack">
+        <child>
+          <object class="GtkStackPage">
+            <property name="name">list_view</property>
+            <property name="child">
+              <object class="GtkScrolledWindow">
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkListBox" id="list_view">
+                    <property name="visible">True</property>
+                    <property name="selection-mode">single</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkStackPage">
+            <property name="name">grid_view</property>
+            <property name="child">
+              <object class="GtkScrolledWindow">
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <child>
+                  <object class="GtkIconView" id="grid_view">
+                    <property name="visible">True</property>
+                    <property name="selection-mode">single</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

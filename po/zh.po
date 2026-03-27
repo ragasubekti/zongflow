@@ -1,0 +1,304 @@
+# Zongflow translations
+# Language: zh_CN
+msgid ""
+msgstr ""
+"Project-Id-Version: zongflow 0.1.0\n"
+"POT-Creation-Date: 2026-03-27 12:00+0000\n"
+"PO-Revision-Date: 2026-03-27 12:00+0000\n"
+"Last-Translator: Auto Generated\n"
+"Language-Team: Zongflow Translators\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#. Fluent key: about
+msgid "ABOUT"
+msgstr "关于"
+
+#. Fluent key: app-title
+msgid "APP_TITLE"
+msgstr "Zongflow"
+
+#. Fluent key: application-information
+msgid "APPLICATION_INFORMATION"
+msgstr "应用程序信息"
+
+#. Fluent key: application-language
+msgid "APPLICATION_LANGUAGE"
+msgstr "应用程序语言"
+
+#. Fluent key: apply
+msgid "APPLY"
+msgstr "Apply"
+
+#. Fluent key: back
+msgid "BACK"
+msgstr "Back"
+
+#. Fluent key: cancel
+msgid "CANCEL"
+msgstr "_取消(_C)"
+
+#. Fluent key: choose
+msgid "CHOOSE"
+msgstr "选择"
+
+#. Fluent key: clear
+msgid "CLEAR"
+msgstr "清除"
+
+#. Fluent key: clear-cache
+msgid "CLEAR_CACHE"
+msgstr "清除缓存"
+
+#. Fluent key: clear-database
+msgid "CLEAR_DATABASE"
+msgstr "清除数据库"
+
+#. Fluent key: close
+msgid "CLOSE"
+msgstr "Close"
+
+#. Fluent key: confirm
+msgid "CONFIRM"
+msgstr "Confirm"
+
+#. Fluent key: convert
+msgid "CONVERT"
+msgstr "转换"
+
+#. Fluent key: copyright
+msgid "COPYRIGHT"
+msgstr "© 2026 Zongflow"
+
+#. Fluent key: dark-mode
+msgid "DARK_MODE"
+msgstr "深色模式"
+
+#. Fluent key: delete
+msgid "DELETE"
+msgstr "Delete"
+
+#. Fluent key: delete-temporary-files
+msgid "DELETE_TEMPORARY_FILES"
+msgstr "删除临时文件"
+
+#. Fluent key: done
+msgid "DONE"
+msgstr "Done"
+
+#. Fluent key: edit
+msgid "EDIT"
+msgstr "Edit"
+
+#. Fluent key: epub-files
+msgid "EPUB_FILES"
+msgstr "EPUB文件"
+
+#. Fluent key: error-occurred
+msgid "ERROR_OCCURRED"
+msgstr "An error occurred"
+
+#. Fluent key: error-scanning
+msgid "ERROR_SCANNING"
+msgstr "扫描错误: { $error }"
+
+#. Fluent key: found-documents
+msgid "FOUND_DOCUMENTS"
+msgstr "找到 { $count } 个文档"
+
+#. Fluent key: general
+msgid "GENERAL"
+msgstr "常规"
+
+#. Fluent key: grid-view
+msgid "GRID_VIEW"
+msgstr "网格视图"
+
+#. Fluent key: just-now
+msgid "JUST_NOW"
+msgstr "Just now"
+
+#. Fluent key: lang-en-us
+msgid "LANG_EN_US"
+msgstr "英语（美国）"
+
+#. Fluent key: lang-ja-jp
+msgid "LANG_JA_JP"
+msgstr "日语"
+
+#. Fluent key: lang-zh-cn
+msgid "LANG_ZH_CN"
+msgstr "中文（简体）"
+
+#. Fluent key: language
+msgid "LANGUAGE"
+msgstr "语言"
+
+#. Fluent key: library
+msgid "LIBRARY"
+msgstr "库"
+
+#. Fluent key: list-view
+msgid "LIST_VIEW"
+msgstr "列表视图"
+
+#. Fluent key: loading
+msgid "LOADING"
+msgstr "Loading..."
+
+#. Fluent key: maintenance
+msgid "MAINTENANCE"
+msgstr "维护"
+
+#. Fluent key: markdown-files
+msgid "MARKDOWN_FILES"
+msgstr "Markdown文件"
+
+#. Fluent key: next
+msgid "NEXT"
+msgstr "Next"
+
+#. Fluent key: no-parent-window
+msgid "NO_PARENT_WINDOW"
+msgstr "无父窗口"
+
+#. Fluent key: no-selection
+msgid "NO_SELECTION"
+msgstr "No selection"
+
+#. Fluent key: ok
+msgid "OK"
+msgstr "OK"
+
+#. Fluent key: open
+msgid "OPEN"
+msgstr "_打开(_O)"
+
+#. Fluent key: output-folder
+msgid "OUTPUT_FOLDER"
+msgstr "输出文件夹"
+
+#. Fluent key: pick-directory
+msgid "PICK_DIRECTORY"
+msgstr "选择目录"
+
+#. Fluent key: pick-file
+msgid "PICK_FILE"
+msgstr "选择文件"
+
+#. Fluent key: remove-all-library-data
+msgid "REMOVE_ALL_LIBRARY_DATA"
+msgstr "删除所有库数据"
+
+#. Fluent key: reset
+msgid "RESET"
+msgstr "重置"
+
+#. Fluent key: reset-settings
+msgid "RESET_SETTINGS"
+msgstr "重置设置"
+
+#. Fluent key: restore-defaults
+msgid "RESTORE_DEFAULTS"
+msgstr "恢复默认值"
+
+#. Fluent key: save
+msgid "SAVE"
+msgstr "Save"
+
+#. Fluent key: save-as
+msgid "SAVE_AS"
+msgstr "Save As"
+
+#. Fluent key: select-directory
+msgid "SELECT_DIRECTORY"
+msgstr "选择目录"
+
+#. Fluent key: select-file
+msgid "SELECT_FILE"
+msgstr "选择文件"
+
+#. Fluent key: select-files-or-directories
+msgid "SELECT_FILES_OR_DIRECTORIES"
+msgstr "选择要转换的文件或目录"
+
+#. Fluent key: select-folder
+msgid "SELECT_FOLDER"
+msgstr "Select Folder"
+
+#. Fluent key: select-output-folder
+msgid "SELECT_OUTPUT_FOLDER"
+msgstr "选择输出文件夹"
+
+#. Fluent key: selected-files
+msgid "SELECTED_FILES"
+msgstr "已选择: { $count }"
+
+#. Fluent key: selected-folder
+msgid "SELECTED_FOLDER"
+msgstr "已选择文件夹: { $path }"
+
+#. Fluent key: success
+msgid "SUCCESS"
+msgstr "Success"
+
+#. Fluent key: text-files
+msgid "TEXT_FILES"
+msgstr "文本文件"
+
+#. Fluent key: today
+msgid "TODAY"
+msgstr "Today"
+
+#. Fluent key: translate
+msgid "TRANSLATE"
+msgstr "翻译"
+
+#. Fluent key: translation-coming-soon
+msgid "TRANSLATION_COMING_SOON"
+msgstr "翻译功能即将推出"
+
+#. Fluent key: use-dark-theme
+msgid "USE_DARK_THEME"
+msgstr "使用深色主题"
+
+#. Fluent key: version
+msgid "VERSION"
+msgstr "0.1.0"
+
+#. Fluent key: where-converted-saved
+msgid "WHERE_CONVERTED_SAVED"
+msgstr "转换后的文件保存位置"
+
+#. Fluent key: yesterday
+msgid "YESTERDAY"
+msgstr "Yesterday"
+
+
+#. New keys for settings changes
+msgid "SETTINGS_CHANGED_MESSAGE"
+msgstr "设置已更改。请按保存按钮应用更改。"
+
+msgid "SETTINGS_SAVED_MESSAGE"
+msgstr "设置保存成功。"
+
+msgid "SETTINGS_RESET_MESSAGE"
+msgstr "设置已重置为默认值。"
+
+msgid "CACHE_CLEARED_MESSAGE"
+msgstr "缓存清除成功。"
+
+msgid "DATABASE_CLEARED_MESSAGE"
+msgstr "数据库清除成功。"
+
+msgid "UNSAVED_CHANGES_MESSAGE"
+msgstr "您有未保存的更改。请按保存按钮应用更改。"
+
+msgid "SETTINGS"
+msgstr "设置"
+
+msgid "PATH_NOT_ALLOWED"
+msgstr "所选路径不在您的主目录中。"
+

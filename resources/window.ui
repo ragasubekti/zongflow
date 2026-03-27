@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <interface domain="zongflow">
+  <template class="ZongflowWindow" parent="AdwWindow">
+    <property name="content">
+      <object class="AdwToolbarView">
+        <child type="top">
+          <object class="AdwHeaderBar" id="header_bar">
+            <property name="title-widget">
+              <object class="AdwWindowTitle">
+                <property name="title" translatable="yes">Zongflow</property>
+              </object>
+            </property>
+          </object>
+        </child>
+        <property name="content">
+          <object class="AdwViewStack" id="stack">
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+          </object>
+        </property>
+        <child type="bottom">
+          <object class="AdwViewSwitcherBar" id="switcher_bar">
+            <property name="stack">stack</property>
+            <property name="reveal">True</property>
+          </object>
+        </child>
+      </object>
+    </property>
+  </template>
+</interface>

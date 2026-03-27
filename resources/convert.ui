@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <interface domain="zongflow">
+  <template class="ConvertWidget" parent="GtkBox">
+    <property name="visible">True</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="AdwClamp">
+        <property name="maximum-size">600</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="visible">True</property>
+            <property name="margin-top">24</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <child>
+              <object class="GtkLabel" id="title_label">
+                <property name="label" translatable="yes">Convert</property>
+                <property name="halign">center</property>
+                <property name="css-classes">title-1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="subtitle_label">
+                <property name="label" translatable="yes">Select files or directories to convert</property>
+                <property name="halign">center</property>
+                <property name="sensitive">False</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox">
+                <property name="orientation">horizontal</property>
+                <property name="spacing">6</property>
+                <property name="halign">center</property>
+                <child>
+                  <object class="GtkButton" id="file_button">
+                    <property name="label" translatable="yes">Pick File</property>
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="directory_button">
+                    <property name="label" translatable="yes">Pick Directory</property>
+                    <property name="halign">center</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="selection_label">
+                <property name="label" translatable="yes">No selection</property>
+                <property name="halign">center</property>
+                <property name="wrap">True</property>
+                <property name="selectable">True</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

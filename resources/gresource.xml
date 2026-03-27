@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<gresources>
+  <gresource prefix="/com/github/zongflow/">
+    <file compressed="true" preprocess="xml-stripblanks">window.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">library.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">convert.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">translate.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">settings.ui</file>
+  </gresource>
+</gresources>

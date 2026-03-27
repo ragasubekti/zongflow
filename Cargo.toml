@@ -1,0 +1,33 @@
+[package]
+name = "zongflow"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+adw = { package = "libadwaita", version = "0.9.1", features = ["v1_4"] }
+gtk = { package = "gtk4", version = "0.11" }
+gio = "0.22"
+glib = "0.22"
+rusqlite = { version = "0.32", features = ["bundled"] }
+dirs = "5.0"
+chrono = "0.4"
+gettext-rs = "0.7"
+toml = "0.8"
+serde = { version = "1.0", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+anyhow = "1.0"
+tempfile = "3.10"
+
+[dev-dependencies]
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
+
+[build-dependencies]
+glib-build-tools = "0.22"
+
+[features]
+default = ["gettext-system"]
+debug = []
+# Use system gettext implementation instead of compiling GNU gettext
+# This improves build times and reduces binary size, and helps with LGPL compliance
+gettext-system = ["gettext-rs/gettext-system"]

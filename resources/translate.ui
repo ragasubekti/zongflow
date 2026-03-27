@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+  <interface domain="zongflow">
+  <template class="TranslateWidget" parent="GtkBox">
+    <property name="visible">True</property>
+    <property name="hexpand">True</property>
+    <property name="vexpand">True</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="AdwClamp">
+        <property name="maximum-size">600</property>
+        <child>
+          <object class="GtkBox">
+            <property name="orientation">vertical</property>
+            <property name="spacing">12</property>
+            <property name="visible">True</property>
+            <property name="margin-top">24</property>
+            <property name="margin-bottom">24</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
+            <child>
+              <object class="GtkLabel" id="title_label">
+                <property name="label" translatable="yes">Translate</property>
+                <property name="halign">center</property>
+                <property name="css-classes">title-1</property>
+              </object>
+            </child>
+            <child>
+              <object class="GtkLabel" id="subtitle_label">
+                <property name="label" translatable="yes">Translation feature coming soon</property>
+                <property name="halign">center</property>
+                <property name="sensitive">False</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

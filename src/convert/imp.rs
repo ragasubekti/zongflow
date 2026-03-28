@@ -48,12 +48,24 @@ impl ObjectSubclass for ConvertWidget {
 impl ConvertWidget {
     #[template_callback]
     fn on_file_button_clicked(&self) {
-        let Some(window) = self
+        // Try to get parent window with fallback
+        let window = self
             .obj()
             .root()
             .and_then(|w| w.downcast::<gtk::Window>().ok())
-        else {
+            .or_else(|| {
+                self.obj()
+                    .ancestor(gtk::Window::static_type())
+                    .and_then(|w| w.downcast::<gtk::Window>().ok())
+            });
+
+        let Some(window) = window else {
             tracing::warn!("No parent window found for file chooser");
+            // Show error dialog even without parent
+            self.show_error_dialog(
+                &i18n::translate("ERROR"),
+                &i18n::translate("NO_PARENT_WINDOW"),
+            );
             return;
         };
 
@@ -64,6 +76,9 @@ impl ConvertWidget {
             Some(&i18n::translate("OPEN")),
             Some(&i18n::translate("CANCEL")),
         );
+
+        // Enable multiple file selection
+        file_chooser.set_select_multiple(true);
 
         let txt_filter = gtk::FileFilter::new();
         txt_filter.set_name(Some(&i18n::translate("TEXT_FILES")));
@@ -88,18 +103,27 @@ impl ConvertWidget {
         let weak_self = self.obj().downgrade();
         file_chooser.connect_response(move |chooser, response| {
             if response == gtk::ResponseType::Accept {
-                if let Some(file) = chooser.file() {
-                    if let Some(path) = file.path() {
-                        if let Some(self_ref) = weak_self.upgrade() {
-                            if !self_ref.imp().is_path_allowed(&path) {
-                                self_ref
-                                    .imp()
-                                    .show_warning(&window, &i18n::translate("PATH_NOT_ALLOWED"));
-                                chooser.destroy();
-                                return;
-                            }
-                        }
+                let files = chooser.files();
+                let n_items = files.n_items();
+                for i in 0..n_items {
+                    let Some(file) = files.item(i).and_then(|f| f.downcast::<gio::File>().ok()) else {
+                        continue;
+                    };
 
+                    // Handle non-local URIs
+                    let Some(path) = file.path() else {
+                        tracing::warn!(uri = %file.uri(), "File has no local path, skipping");
+                        if let Some(self_ref) = weak_self.upgrade() {
+                            self_ref.imp().show_warning(
+                                &window,
+                                &format!("{}: {}", i18n::translate("FILE_NOT_LOCAL"), file.uri()),
+                            );
+                        }
+                        continue;
+                    };
+
+                    if let Some(self_ref) = weak_self.upgrade() {
+                        // Removed restrictive path check - allow any file
                         if let Some(db) = db.borrow().as_ref() {
                             match Self::add_document_from_path(&path, db, &list_box, &documents) {
                                 Ok(_) => {
@@ -107,13 +131,20 @@ impl ConvertWidget {
                                 }
                                 Err(e) => {
                                     tracing::error!(path = ?path, error = %e, "Failed to import file");
+                                    // Show error to user
+                                    if let Some(self_ref) = weak_self.upgrade() {
+                                        self_ref.imp().show_warning(
+                                            &window,
+                                            &format!("{}: {}", i18n::translate("IMPORT_FAILED"), e),
+                                        );
+                                    }
                                 }
                             }
                         }
+                    }
 
-                        if let Some(self_ref) = weak_self.upgrade() {
-                            self_ref.imp().update_convert_button();
-                        }
+                    if let Some(self_ref) = weak_self.upgrade() {
+                        self_ref.imp().update_convert_button();
                     }
                 }
             }
@@ -124,12 +155,23 @@ impl ConvertWidget {
 
     #[template_callback]
     fn on_directory_button_clicked(&self) {
-        let Some(window) = self
+        // Try to get parent window with fallback
+        let window = self
             .obj()
             .root()
             .and_then(|w| w.downcast::<gtk::Window>().ok())
-        else {
+            .or_else(|| {
+                self.obj()
+                    .ancestor(gtk::Window::static_type())
+                    .and_then(|w| w.downcast::<gtk::Window>().ok())
+            });
+
+        let Some(window) = window else {
             tracing::warn!("No parent window found for directory chooser");
+            self.show_error_dialog(
+                &i18n::translate("ERROR"),
+                &i18n::translate("NO_PARENT_WINDOW"),
+            );
             return;
         };
 
@@ -149,38 +191,44 @@ impl ConvertWidget {
         folder_chooser.connect_response(move |chooser, response| {
             if response == gtk::ResponseType::Accept {
                 if let Some(folder) = chooser.file() {
-                    if let Some(path) = folder.path() {
+                    // Handle non-local URIs
+                    let Some(path) = folder.path() else {
+                        tracing::warn!(uri = %folder.uri(), "Folder has no local path");
                         if let Some(self_ref) = weak_self.upgrade() {
-                            if !self_ref.imp().is_path_allowed(&path) {
-                                tracing::warn!(path = ?path, "Path not allowed for scanning");
-                                self_ref
-                                    .imp()
-                                    .show_warning(&window, &i18n::translate("PATH_NOT_ALLOWED"));
-                                chooser.destroy();
-                                return;
+                            self_ref.imp().show_warning(
+                                &window,
+                                &format!("{}: {}", i18n::translate("FOLDER_NOT_LOCAL"), folder.uri()),
+                            );
+                        }
+                        chooser.destroy();
+                        return;
+                    };
+
+                    if let Some(db) = db.borrow().as_ref() {
+                        tracing::info!(path = ?path, "Scanning directory for import");
+                        match DocumentScanner::scan_directory(&path, db) {
+                            Ok(docs) => {
+                                tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
+                                for doc in &docs {
+                                    let row = Self::create_expander_row(doc);
+                                    list_box.append(&row);
+                                }
+                                documents.borrow_mut().extend(docs);
+                            }
+                            Err(e) => {
+                                tracing::error!(path = ?path, error = %e, "Failed to scan directory");
+                                if let Some(self_ref) = weak_self.upgrade() {
+                                    self_ref.imp().show_warning(
+                                        &window,
+                                        &format!("{}: {}", i18n::translate("SCAN_FAILED"), e),
+                                    );
+                                }
                             }
                         }
+                    }
 
-                        if let Some(db) = db.borrow().as_ref() {
-                            tracing::info!(path = ?path, "Scanning directory for import");
-                            match DocumentScanner::scan_directory(&path, db) {
-                                Ok(docs) => {
-                                    tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
-                                    for doc in &docs {
-                                        let row = Self::create_expander_row(doc);
-                                        list_box.append(&row);
-                                    }
-                                    documents.borrow_mut().extend(docs);
-                                }
-                                Err(e) => {
-                                    tracing::error!(path = ?path, error = %e, "Failed to scan directory");
-                                }
-                            }
-                        }
-
-                        if let Some(self_ref) = weak_self.upgrade() {
-                            self_ref.imp().update_convert_button();
-                        }
+                    if let Some(self_ref) = weak_self.upgrade() {
+                        self_ref.imp().update_convert_button();
                     }
                 }
             }
@@ -255,7 +303,11 @@ impl ConvertWidget {
     fn create_expander_row(doc: &Document) -> adw::ExpanderRow {
         let expander = adw::ExpanderRow::builder()
             .title(&doc.title)
-            .subtitle(&Self::format_subtitle(&doc.format, doc.file_size_bytes, &doc.text_encoding))
+            .subtitle(&Self::format_subtitle(
+                &doc.format,
+                doc.file_size_bytes,
+                &doc.text_encoding,
+            ))
             .selectable(false)
             .show_enable_switch(false)
             .build();
@@ -336,12 +388,21 @@ impl ConvertWidget {
         self.convert_button.set_label(&i18n::translate("CONVERT"));
     }
 
-    fn is_path_allowed(&self, path: &std::path::Path) -> bool {
-        if let Some(home) = home_dir() {
-            path.starts_with(home)
-        } else {
-            true
-        }
+    fn show_error_dialog(&self, title: &str, message: &str) {
+        let dialog = gtk::MessageDialog::new(
+            self.obj()
+                .root()
+                .as_ref()
+                .and_then(|w| w.downcast_ref::<gtk::Window>()),
+            gtk::DialogFlags::MODAL,
+            gtk::MessageType::Error,
+            gtk::ButtonsType::Ok,
+            "{}",
+        );
+        dialog.set_title(Some(title));
+        dialog.set_secondary_text(Some(message));
+        dialog.connect_response(|dialog, _| dialog.close());
+        dialog.show();
     }
 
     fn show_warning(&self, parent: &gtk::Window, message: &str) {
@@ -350,10 +411,20 @@ impl ConvertWidget {
             gtk::DialogFlags::MODAL,
             gtk::MessageType::Warning,
             gtk::ButtonsType::Ok,
-            message,
+            "{}",
         );
+        dialog.set_title(Some(&i18n::translate("WARNING")));
+        dialog.set_secondary_text(Some(message));
         dialog.connect_response(|dialog, _| dialog.close());
         dialog.show();
+    }
+
+    fn is_path_allowed(&self, path: &std::path::Path) -> bool {
+        if let Some(home) = home_dir() {
+            path.starts_with(home)
+        } else {
+            true
+        }
     }
 
     fn update_convert_button(&self) {
@@ -365,15 +436,38 @@ impl ConvertWidget {
 impl ObjectImpl for ConvertWidget {
     fn constructed(&self) {
         self.parent_constructed();
-        *self.selected_format.borrow_mut() = "txt".to_string();
+
+        // Load saved export format from settings
+        let saved_format = if let Some(db) = self.db.borrow().as_ref() {
+            let mgr = crate::core::SettingsManager::new(db.clone());
+            mgr.get_export_format()
+        } else {
+            "txt".to_string()
+        };
+
+        *self.selected_format.borrow_mut() = saved_format.clone();
+
+        // Set the toggle to the saved format
+        self.output_toggle.set_active_name(Some(&saved_format));
+
+        // Connect to format changes
         self.output_toggle.connect_active_name_notify(|toggle| {
             let widget = toggle
                 .ancestor(super::ConvertWidget::static_type())
                 .and_then(|w| w.downcast::<super::ConvertWidget>().ok());
             if let Some(widget) = widget {
                 let name = toggle.active_name().unwrap_or_default().to_string();
-                *widget.imp().selected_format.borrow_mut() = name;
-                tracing::info!(format = %widget.imp().selected_format.borrow(), "Output format changed");
+                *widget.imp().selected_format.borrow_mut() = name.clone();
+
+                // Save the format to settings
+                if let Some(db) = widget.imp().db.borrow().as_ref() {
+                    let mut mgr = crate::core::SettingsManager::new(db.clone());
+                    if let Err(e) = mgr.set_export_format(&name) {
+                        tracing::error!("Failed to save export format: {}", e);
+                    }
+                }
+
+                tracing::info!(format = %name, "Output format changed and saved");
             }
         });
     }

@@ -47,18 +47,16 @@ impl DocumentScanner {
                                 .unwrap_or("Unknown")
                                 .to_string();
                             let format = Self::normalize_format(&ext_lower);
-                            
+
                             // Get file size from metadata
-                            let file_size_bytes = fs::metadata(&path)
-                                .ok()
-                                .map(|m| m.len() as i64);
-                            
+                            let file_size_bytes = fs::metadata(&path).ok().map(|m| m.len() as i64);
+
                             // Determine text encoding for text formats
                             let text_encoding = match ext_lower.as_str() {
                                 "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
                                 _ => None, // Binary formats like EPUB don't have text encoding
                             };
-                            
+
                             let doc = Document {
                                 id: 0, // will be assigned by database
                                 title,
@@ -158,6 +156,15 @@ impl SettingsManager {
 
     pub fn set_output_folder(&mut self, path: &Path) -> Result<()> {
         self.settings.output_folder = path.to_path_buf();
+        self.save_settings()
+    }
+
+    pub fn get_export_format(&self) -> String {
+        self.settings.export_format.clone()
+    }
+
+    pub fn set_export_format(&mut self, format: &str) -> Result<()> {
+        self.settings.export_format = format.to_string();
         self.save_settings()
     }
 

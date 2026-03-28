@@ -20,10 +20,6 @@ impl SettingsWidget {
         *self.imp().db.borrow_mut() = Some(db);
         self.imp().init_ui();
     }
-
-    pub fn save_pending(&self) {
-        self.imp().save_pending();
-    }
 }
 
 impl Default for SettingsWidget {

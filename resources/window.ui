@@ -8,8 +8,8 @@
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
             <property name="title-widget">
-              <object class="AdwWindowTitle">
-                <property name="title" translatable="yes">Zongflow</property>
+              <object class="AdwViewSwitcherTitle" id="view_switcher_title">
+                <property name="stack">stack</property>
               </object>
             </property>
             <child type="end">

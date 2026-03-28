@@ -43,8 +43,11 @@
             <property name="label" translatable="yes">Convert</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
+            <property name="width-request">120</property>
+            <property name="height-request">40</property>
             <style>
               <class name="suggested-action"/>
+              <class name="large"/>
             </style>
           </object>
         </child>

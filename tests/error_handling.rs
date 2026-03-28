@@ -25,7 +25,15 @@ fn test_database_connection_error_handling() {
     assert!(id > 0);
 
     // Try to insert duplicate path (should fail)
-    let result = db.insert_document("Another Document", None, "txt", "/test/path.txt", None, None, None);
+    let result = db.insert_document(
+        "Another Document",
+        None,
+        "txt",
+        "/test/path.txt",
+        None,
+        None,
+        None,
+    );
     assert!(result.is_err());
 
     // Error should contain context

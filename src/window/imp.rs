@@ -16,6 +16,8 @@ pub struct ZongflowWindow {
     pub switcher_bar: TemplateChild<adw::ViewSwitcherBar>,
     #[template_child]
     pub settings_button: TemplateChild<gtk::Button>,
+    #[template_child]
+    pub view_switcher_title: TemplateChild<adw::ViewSwitcherTitle>,
     pub db: RefCell<Option<Database>>,
 }
 

@@ -12,6 +12,8 @@ pub struct Settings {
     pub dark_mode: bool,
     #[serde(default = "default_output_folder")]
     pub output_folder: PathBuf,
+    #[serde(default = "default_export_format")]
+    pub export_format: String,
 }
 
 fn default_language() -> String {
@@ -22,12 +24,17 @@ fn default_output_folder() -> PathBuf {
     dirs::download_dir().unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
 }
 
+fn default_export_format() -> String {
+    "txt".to_string()
+}
+
 impl Default for Settings {
     fn default() -> Self {
         Settings {
             language: default_language(),
             dark_mode: false,
             output_folder: default_output_folder(),
+            export_format: default_export_format(),
         }
     }
 }

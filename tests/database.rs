@@ -55,7 +55,15 @@ fn test_document_crud() {
 
     // Insert a document
     let doc_id = db
-        .insert_document("Test Doc", Some("Author"), "txt", "/path/to/doc.txt", None, Some(1024), Some("UTF-8"))
+        .insert_document(
+            "Test Doc",
+            Some("Author"),
+            "txt",
+            "/path/to/doc.txt",
+            None,
+            Some(1024),
+            Some("UTF-8"),
+        )
         .unwrap();
     assert!(doc_id > 0);
 
@@ -316,7 +324,15 @@ fn test_file_size_bytes_persistence() {
 
     // Insert document with file size
     let id = db
-        .insert_document("Sized Doc", None, "txt", "/sized.txt", None, Some(2048), Some("UTF-8"))
+        .insert_document(
+            "Sized Doc",
+            None,
+            "txt",
+            "/sized.txt",
+            None,
+            Some(2048),
+            Some("UTF-8"),
+        )
         .unwrap();
     assert!(id > 0);
 
@@ -356,7 +372,15 @@ fn test_text_encoding_persistence() {
 
     // Insert document with text encoding
     let id = db
-        .insert_document("Encoded Doc", None, "txt", "/encoded.txt", None, Some(1024), Some("UTF-16"))
+        .insert_document(
+            "Encoded Doc",
+            None,
+            "txt",
+            "/encoded.txt",
+            None,
+            Some(1024),
+            Some("UTF-16"),
+        )
         .unwrap();
     assert!(id > 0);
 
@@ -370,7 +394,7 @@ fn test_text_encoding_persistence() {
 fn test_migration_adds_new_columns() {
     let dir = tempdir().unwrap();
     let db_path = dir.path().join("test.db");
-    
+
     // Create a database with the old schema (without file_size_bytes and text_encoding)
     {
         let conn = rusqlite::Connection::open(&db_path).unwrap();
@@ -393,7 +417,7 @@ fn test_migration_adds_new_columns() {
             ",
         )
         .unwrap();
-        
+
         // Insert a document with the old schema
         conn.execute(
             "INSERT INTO documents (title, author, format, path, date_added, cover_path) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
@@ -401,32 +425,40 @@ fn test_migration_adds_new_columns() {
         )
         .unwrap();
     }
-    
+
     // Now open the database with the new code - this should trigger migration
     let db = Database::new_with_path(db_path).unwrap();
-    
+
     // Verify the old document is still accessible
     let doc = db.get_document_by_path("/old.txt").unwrap().unwrap();
     assert_eq!(doc.title, "Old Doc");
     assert_eq!(doc.author, Some("Author".to_string()));
     assert_eq!(doc.format, "txt");
-    
+
     // The new columns should be None for the old document
     assert_eq!(doc.file_size_bytes, None);
     assert_eq!(doc.text_encoding, None);
-    
+
     // Insert a new document with the new columns
     let id = db
-        .insert_document("New Doc", None, "md", "/new.md", None, Some(512), Some("UTF-8"))
+        .insert_document(
+            "New Doc",
+            None,
+            "md",
+            "/new.md",
+            None,
+            Some(512),
+            Some("UTF-8"),
+        )
         .unwrap();
     assert!(id > 0);
-    
+
     // Verify the new document has the new columns populated
     let new_doc = db.get_document_by_path("/new.md").unwrap().unwrap();
     assert_eq!(new_doc.title, "New Doc");
     assert_eq!(new_doc.file_size_bytes, Some(512));
     assert_eq!(new_doc.text_encoding, Some("UTF-8".to_string()));
-    
+
     // Verify both documents are in the list
     let docs = db.list_documents().unwrap();
     assert_eq!(docs.len(), 2);

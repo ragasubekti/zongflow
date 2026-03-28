@@ -56,6 +56,11 @@ impl ZongflowWindow {
             "folder-documents-symbolic",
         );
 
+        // Bind the view switcher title to the library's view stack
+        let view_switcher_title = self.imp().view_switcher_title.get();
+        let library_view_stack = library.imp().view_stack.get();
+        view_switcher_title.set_stack(Some(&library_view_stack));
+
         let convert = ConvertWidget::new();
         if let Some(db) = db.clone() {
             convert.set_db(db);
@@ -86,7 +91,9 @@ impl ZongflowWindow {
         let window_weak = self.downgrade();
 
         button.connect_clicked(move |_| {
-            let Some(window) = window_weak.upgrade() else { return };
+            let Some(window) = window_weak.upgrade() else {
+                return;
+            };
 
             let settings = SettingsWidget::new();
             if let Some(db) = db.clone() {

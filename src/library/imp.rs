@@ -13,15 +13,11 @@ use tracing;
 #[template(resource = "/com/github/zongflow/library.ui")]
 pub struct LibraryWidget {
     #[template_child]
-    pub view_switcher: TemplateChild<adw::ViewSwitcher>,
-    #[template_child]
     pub view_stack: TemplateChild<adw::ViewStack>,
     #[template_child]
     pub list_scrolled: TemplateChild<gtk::ScrolledWindow>,
     #[template_child]
     pub grid_scrolled: TemplateChild<gtk::ScrolledWindow>,
-    #[template_child]
-    pub separator: TemplateChild<gtk::Separator>,
     #[template_child]
     pub status_page: TemplateChild<adw::StatusPage>,
     pub db: RefCell<Option<Database>>,
@@ -118,7 +114,10 @@ impl LibraryWidget {
             let obj = item.item().and_downcast::<DocumentObject>().unwrap();
             let vbox = item.child().and_downcast::<gtk::Box>().unwrap();
             let title_lbl = vbox.first_child().and_downcast::<gtk::Label>().unwrap();
-            let path_lbl = title_lbl.next_sibling().and_downcast::<gtk::Label>().unwrap();
+            let path_lbl = title_lbl
+                .next_sibling()
+                .and_downcast::<gtk::Label>()
+                .unwrap();
             title_lbl.set_text(&obj.title());
             path_lbl.set_text(&obj.display_path());
         });
@@ -147,10 +146,8 @@ impl LibraryWidget {
 
         // Date column
         let date_factory = gtk::SignalListItemFactory::new();
-        let date_col = gtk::ColumnViewColumn::new(
-            Some(&i18n::translate("Date")),
-            Some(date_factory.clone()),
-        );
+        let date_col =
+            gtk::ColumnViewColumn::new(Some(&i18n::translate("Date")), Some(date_factory.clone()));
         date_factory.connect_setup(|_, item| {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
@@ -167,10 +164,8 @@ impl LibraryWidget {
 
         // Size column
         let size_factory = gtk::SignalListItemFactory::new();
-        let size_col = gtk::ColumnViewColumn::new(
-            Some(&i18n::translate("Size")),
-            Some(size_factory.clone()),
-        );
+        let size_col =
+            gtk::ColumnViewColumn::new(Some(&i18n::translate("Size")), Some(size_factory.clone()));
         size_factory.connect_setup(|_, item| {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
@@ -263,8 +258,14 @@ impl LibraryWidget {
             let card = item.child().and_downcast::<gtk::Box>().unwrap();
             let picture = card.first_child().and_downcast::<gtk::Picture>().unwrap();
             let title_lbl = picture.next_sibling().and_downcast::<gtk::Label>().unwrap();
-            let author_lbl = title_lbl.next_sibling().and_downcast::<gtk::Label>().unwrap();
-            let meta_lbl = author_lbl.next_sibling().and_downcast::<gtk::Label>().unwrap();
+            let author_lbl = title_lbl
+                .next_sibling()
+                .and_downcast::<gtk::Label>()
+                .unwrap();
+            let meta_lbl = author_lbl
+                .next_sibling()
+                .and_downcast::<gtk::Label>()
+                .unwrap();
 
             match obj.cover_path() {
                 Some(ref cover) if !cover.is_empty() && Path::new(cover).exists() => {
@@ -323,8 +324,7 @@ impl LibraryWidget {
         // Toggle empty state
         let is_empty = docs.is_empty();
         self.status_page.set_visible(is_empty);
-        self.view_switcher.set_visible(!is_empty);
-        self.separator.set_visible(!is_empty);
+        self.view_stack.set_visible(!is_empty);
     }
 
     pub fn update_ui_strings(&self) {

@@ -3,17 +3,6 @@
   <template class="LibraryWidget" parent="GtkBox">
     <property name="orientation">vertical</property>
     <child>
-      <object class="AdwViewSwitcher" id="view_switcher">
-        <property name="stack">view_stack</property>
-        <property name="policy">wide</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkSeparator" id="separator">
-        <property name="orientation">horizontal</property>
-      </object>
-    </child>
-    <child>
       <object class="AdwViewStack" id="view_stack">
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>

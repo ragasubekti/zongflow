@@ -300,3 +300,42 @@ msgstr "Settings"
 
 msgid "PATH_NOT_ALLOWED"
 msgstr "Selected path is outside your home directory."
+
+msgid "IMPORT_FILE"
+msgstr "Import File"
+
+msgid "IMPORT_DIRECTORY"
+msgstr "Import Directory"
+
+msgid "ERROR"
+msgstr "Error"
+
+msgid "WARNING"
+msgstr "Warning"
+
+msgid "FILE_NOT_LOCAL"
+msgstr "File is not locally accessible"
+
+msgid "FOLDER_NOT_LOCAL"
+msgstr "Folder is not locally accessible"
+
+msgid "IMPORT_FAILED"
+msgstr "Import failed"
+
+msgid "SCAN_FAILED"
+msgstr "Scan failed"
+
+msgid "NO_DOCUMENTS"
+msgstr "No Documents"
+
+msgid "ADD_DOCUMENTS_TO_LIBRARY"
+msgstr "Add documents to your library to get started"
+
+msgid "ADD_DOCUMENTS_TO_TRANSLATE"
+msgstr "Add documents to translate"
+
+msgid "NO_FILES"
+msgstr "No Files"
+
+msgid "IMPORT_FILES_TO_GET_STARTED"
+msgstr "Import files or directories to get started"

@@ -6,31 +6,60 @@
     <property name="vexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="AdwClamp">
-        <property name="maximum-size">600</property>
-        <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
-            <property name="visible">True</property>
-            <property name="margin-top">24</property>
-            <property name="margin-bottom">24</property>
-            <property name="margin-start">24</property>
-            <property name="margin-end">24</property>
-            <child>
-              <object class="GtkLabel" id="title_label">
-                <property name="label" translatable="yes">Translate</property>
+      <object class="AdwViewStack" id="view_stack">
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <child type="titled">
+          <object class="AdwViewStackPage">
+            <property name="name">coming_soon</property>
+            <property name="child">
+              <object class="AdwClamp">
+                <property name="maximum-size">600</property>
                 <property name="halign">center</property>
-                <property name="css-classes">title-1</property>
+                <property name="valign">center</property>
+                <child>
+                  <object class="GtkBox">
+                    <property name="orientation">vertical</property>
+                    <property name="spacing">12</property>
+                    <property name="visible">True</property>
+                    <property name="halign">center</property>
+                    <property name="margin-top">24</property>
+                    <property name="margin-bottom">24</property>
+                    <property name="margin-start">24</property>
+                    <property name="margin-end">24</property>
+                    <child>
+                      <object class="GtkLabel" id="title_label">
+                        <property name="label" translatable="yes">Translate</property>
+                        <property name="halign">center</property>
+                        <property name="css-classes">title-1</property>
+                      </object>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="subtitle_label">
+                        <property name="label" translatable="yes">Translation feature coming soon</property>
+                        <property name="halign">center</property>
+                        <property name="sensitive">False</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
               </object>
-            </child>
-            <child>
-              <object class="GtkLabel" id="subtitle_label">
-                <property name="label" translatable="yes">Translation feature coming soon</property>
-                <property name="halign">center</property>
-                <property name="sensitive">False</property>
+            </property>
+          </object>
+        </child>
+        <child type="titled">
+          <object class="AdwViewStackPage">
+            <property name="name">no_files</property>
+            <property name="child">
+              <object class="AdwStatusPage" id="status_page">
+                <property name="icon-name">preferences-desktop-locale-symbolic</property>
+                <property name="title" translatable="yes">No Documents</property>
+                <property name="description" translatable="yes">Add documents to translate</property>
+                <property name="visible">True</property>
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
               </object>
-            </child>
+            </property>
           </object>
         </child>
       </object>

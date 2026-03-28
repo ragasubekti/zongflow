@@ -4,6 +4,7 @@ use adw::subclass::prelude::*;
 use glib::subclass::InitializingObject;
 use gtk::CompositeTemplate;
 use std::cell::RefCell;
+use tracing;
 
 #[derive(CompositeTemplate, Default)]
 #[template(resource = "/com/github/zongflow/window.ui")]
@@ -17,7 +18,9 @@ pub struct ZongflowWindow {
     #[template_child]
     pub settings_button: TemplateChild<gtk::Button>,
     #[template_child]
-    pub view_switcher_title: TemplateChild<adw::ViewSwitcherTitle>,
+    pub view_toggle_group: TemplateChild<adw::ToggleGroup>,
+    #[template_child]
+    pub import_button: TemplateChild<adw::SplitButton>,
     pub db: RefCell<Option<Database>>,
 }
 
@@ -43,21 +46,28 @@ impl AdwWindowImpl for ZongflowWindow {}
 
 impl ZongflowWindow {
     pub fn update_ui_strings(&self) {
+        tracing::debug!("ZongflowWindow::update_ui_strings called");
         let stack = &self.stack;
 
         if let Some(library_page) = stack.child_by_name("library") {
             let page = stack.page(&library_page);
-            page.set_title(Some(&i18n::translate("LIBRARY")));
+            let title = i18n::translate("LIBRARY");
+            tracing::debug!("Setting library title to {}", title);
+            page.set_title(Some(&title));
         }
 
         if let Some(convert_page) = stack.child_by_name("convert") {
             let page = stack.page(&convert_page);
-            page.set_title(Some(&i18n::translate("CONVERT")));
+            let title = i18n::translate("CONVERT");
+            tracing::debug!("Setting convert title to {}", title);
+            page.set_title(Some(&title));
         }
 
         if let Some(translate_page) = stack.child_by_name("translate") {
             let page = stack.page(&translate_page);
-            page.set_title(Some(&i18n::translate("TRANSLATE")));
+            let title = i18n::translate("TRANSLATE");
+            tracing::debug!("Setting translate title to {}", title);
+            page.set_title(Some(&title));
         }
     }
 }

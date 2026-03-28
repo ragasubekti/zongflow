@@ -1,6 +1,7 @@
 use crate::core::SettingsManager;
 use crate::database::Database;
 use crate::i18n;
+use crate::window::ZongflowWindow;
 use adw::prelude::*;
 use adw::subclass::prelude::PreferencesPageImpl;
 use glib::subclass::InitializingObject;
@@ -77,6 +78,7 @@ pub struct SettingsWidget {
     #[template_child]
     pub about_button: TemplateChild<gtk::Button>,
     pub db: RefCell<Option<Database>>,
+    pub window: RefCell<Option<glib::WeakRef<ZongflowWindow>>>,
     refreshing_dropdown: Cell<bool>,
 }
 
@@ -120,32 +122,51 @@ impl SettingsWidget {
         // Update all UI strings with current language
         self.update_ui_strings();
 
-        // Connect language change — save immediately
-        let this = self.obj().clone();
+        // Manually connect output folder button signal as fallback
+        let weak_self = self.obj().downgrade();
+        self.output_folder_button.connect_clicked(move |_| {
+            let Some(this) = weak_self.upgrade() else {
+                return;
+            };
+            this.imp().on_output_folder_button_clicked();
+        });
+
+        // Connect language change — defer heavy work to avoid UI freeze
+        let weak_self = self.obj().downgrade();
         self.language_dropdown.connect_selected_notify(move |dd| {
+            let Some(this) = weak_self.upgrade() else {
+                return;
+            };
             let imp = this.imp();
             if imp.refreshing_dropdown.get() {
                 return;
             }
             let idx = dd.selected();
-            let lang = LANGUAGES[idx as usize];
+            let lang = LANGUAGES[idx as usize].to_string();
 
-            // Save immediately
-            let db_borrow = imp.db.borrow();
-            if let Some(db) = db_borrow.as_ref() {
-                let mut mgr = SettingsManager::new(db.clone());
-                match mgr.set_language(lang) {
-                    Ok(_) => {
-                        i18n::set_current_locale(lang);
-                        imp.refresh_language_dropdown();
-                        imp.update_ui_strings();
-                        imp.show_toast(&i18n::translate("SETTINGS_SAVED_MESSAGE"));
-                    }
-                    Err(e) => {
-                        imp.show_toast(&format!("Failed to save language: {}", e));
+            let weak = this.downgrade();
+            glib::idle_add_local_once(move || {
+                let Some(this) = weak.upgrade() else {
+                    return;
+                };
+                let imp = this.imp();
+                let db_borrow = imp.db.borrow();
+                if let Some(db) = db_borrow.as_ref() {
+                    let mut mgr = SettingsManager::new(db.clone());
+                    match mgr.set_language(&lang) {
+                        Ok(_) => {
+                            i18n::set_current_locale(&lang);
+                            imp.refresh_language_dropdown();
+                            imp.update_ui_strings();
+                            imp.notify_parent_window();
+                            imp.show_toast(&i18n::translate("SETTINGS_SAVED_MESSAGE"));
+                        }
+                        Err(e) => {
+                            imp.show_toast(&format!("Failed to save language: {}", e));
+                        }
                     }
                 }
-            }
+            });
         });
 
         // Connect dark mode switch — save immediately
@@ -351,8 +372,24 @@ impl SettingsWidget {
         }
     }
 
+    fn notify_parent_window(&self) {
+        tracing::debug!("notify_parent_window called");
+        let window_ref = self.window.borrow();
+        if let Some(weak_window) = window_ref.as_ref() {
+            if let Some(window) = weak_window.upgrade() {
+                tracing::debug!("Calling ZongflowWindow::update_ui_strings");
+                window.update_ui_strings();
+            } else {
+                tracing::warn!("Window reference is dead");
+            }
+        } else {
+            tracing::warn!("No window reference stored");
+        }
+    }
+
     #[template_callback]
     fn on_output_folder_button_clicked(&self) {
+        tracing::info!("Output folder button clicked");
         let Some(window) = self
             .obj()
             .root()

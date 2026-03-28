@@ -1,15 +1,15 @@
-<?xml version="1.0" encoding="UTF-8"?>
-  <interface domain="zongflow">
+<?xml version="1.0" encoding="UTF-8" ?>
+<interface domain="zongflow">
   <template class="ConvertWidget" parent="GtkBox">
     <property name="visible">True</property>
     <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
+    <property name="vexpand">False</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkBox">
         <property name="orientation">horizontal</property>
         <property name="spacing">12</property>
-        <property name="halign">center</property>
+        <property name="halign">start</property>
         <property name="valign">start</property>
         <property name="margin-top">12</property>
         <property name="margin-bottom">12</property>
@@ -18,6 +18,9 @@
         <child>
           <object class="AdwToggleGroup" id="output_toggle">
             <property name="visible">True</property>
+            <style>
+              <class name="round" />
+            </style>
             <child>
               <object class="AdwToggle">
                 <property name="label" translatable="yes">TXT</property>
@@ -43,64 +46,77 @@
             <property name="label" translatable="yes">Convert</property>
             <property name="visible">True</property>
             <property name="sensitive">False</property>
-            <property name="width-request">120</property>
-            <property name="height-request">40</property>
             <style>
-              <class name="suggested-action"/>
-              <class name="large"/>
+              <class name="suggested-action" />
             </style>
           </object>
         </child>
       </object>
     </child>
     <child>
-      <object class="GtkSeparator">
-        <property name="orientation">horizontal</property>
-      </object>
-    </child>
-    <child>
-      <object class="GtkOverlay" id="import_overlay">
+      <object class="GtkBox" id="import_overlay">
+        <property name="visible">True</property>
         <property name="hexpand">True</property>
         <property name="vexpand">True</property>
+        <property name="orientation">vertical</property>
+        <property name="halign">fill</property>
+        <property name="valign">fill</property>
         <child>
-          <object class="GtkScrolledWindow">
+          <object class="GtkBox">
+            <property name="visible">True</property>
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
+            <property name="orientation">vertical</property>
+            <property name="margin-start">24</property>
+            <property name="margin-end">24</property>
             <child>
-              <object class="GtkListBox" id="list_box">
-                <property name="visible">True</property>
-                <property name="selection-mode">none</property>
-                <style>
-                  <class name="boxed-list"/>
-                </style>
-              </object>
-            </child>
-          </object>
-        </child>
-        <child type="overlay">
-          <object class="GtkBox">
-            <property name="halign">center</property>
-            <property name="valign">end</property>
-            <property name="margin-bottom">16</property>
-            <property name="spacing">8</property>
-            <child>
-              <object class="GtkButton" id="file_button">
-                <property name="label" translatable="yes">Import File</property>
-                <property name="visible">True</property>
-                <style>
-                  <class name="pill"/>
-                  <class name="suggested-action"/>
-                </style>
-              </object>
-            </child>
-            <child>
-              <object class="GtkButton" id="directory_button">
-                <property name="label" translatable="yes">Import Directory</property>
-                <property name="visible">True</property>
-                <style>
-                  <class name="pill"/>
-                  <class name="suggested-action"/>
-                </style>
+              <object class="AdwViewStack" id="content_stack">
+                <property name="hexpand">True</property>
+                <property name="vexpand">True</property>
+                <child type="titled">
+                  <object class="AdwViewStackPage">
+                    <property name="name">list</property>
+                    <property name="child">
+                      <object class="GtkScrolledWindow">
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">False</property>
+                        <property name="child">
+                          <object class="GtkListBox" id="list_box">
+                            <property name="visible">True</property>
+                            <property name="selection-mode">none</property>
+                            <property name="hexpand">True</property>
+                            <property name="valign">start</property>
+                            <style>
+                              <class name="boxed-list" />
+                            </style>
+                          </object>
+                        </property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
+                <child type="titled">
+                  <object class="AdwViewStackPage">
+                    <property name="name">status</property>
+                    <property name="child">
+                      <object class="AdwStatusPage" id="status_page">
+                        <property
+                                                    name="icon-name"
+                                                >document-open-symbolic</property>
+                        <property
+                                                    name="title"
+                                                    translatable="yes"
+                                                >No Files</property>
+                        <property
+                                                    name="description"
+                                                    translatable="yes"
+                                                >Import files or directories to get started</property>
+                        <property name="visible">True</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                    </property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

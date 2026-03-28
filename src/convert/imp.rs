@@ -2,12 +2,12 @@ use crate::core::DocumentScanner;
 use crate::database::{Database, Document};
 use crate::i18n;
 use adw::prelude::ExpanderRowExt;
-use dirs::home_dir;
 use glib::subclass::InitializingObject;
 use gtk::prelude::*;
 use gtk::subclass::prelude::*;
 use gtk::CompositeTemplate;
 use std::cell::RefCell;
+use std::rc::Rc;
 use tracing;
 
 #[derive(CompositeTemplate, Default)]
@@ -17,15 +17,18 @@ pub struct ConvertWidget {
     pub output_toggle: TemplateChild<adw::ToggleGroup>,
     #[template_child]
     pub convert_button: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub file_button: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub directory_button: TemplateChild<gtk::Button>,
+
     #[template_child]
     pub list_box: TemplateChild<gtk::ListBox>,
+    #[template_child]
+    pub import_overlay: TemplateChild<gtk::Box>,
+    #[template_child]
+    pub status_page: TemplateChild<adw::StatusPage>,
+    #[template_child]
+    pub content_stack: TemplateChild<adw::ViewStack>,
     pub db: RefCell<Option<Database>>,
     pub selected_format: RefCell<String>,
-    pub documents: RefCell<Vec<Document>>,
+    pub documents: Rc<RefCell<Vec<Document>>>,
 }
 
 #[glib::object_subclass]
@@ -47,7 +50,8 @@ impl ObjectSubclass for ConvertWidget {
 #[gtk::template_callbacks]
 impl ConvertWidget {
     #[template_callback]
-    fn on_file_button_clicked(&self) {
+    pub fn on_file_button_clicked(&self) {
+        tracing::info!("File button clicked");
         // Try to get parent window with fallback
         let window = self
             .obj()
@@ -96,7 +100,6 @@ impl ConvertWidget {
         md_filter.add_pattern("*.markdown");
         file_chooser.add_filter(&md_filter);
 
-        let db = self.db.clone();
         let list_box = self.list_box.clone();
         let documents = self.documents.clone();
         let window = window.clone();
@@ -106,7 +109,8 @@ impl ConvertWidget {
                 let files = chooser.files();
                 let n_items = files.n_items();
                 for i in 0..n_items {
-                    let Some(file) = files.item(i).and_then(|f| f.downcast::<gio::File>().ok()) else {
+                    let Some(file) = files.item(i).and_then(|f| f.downcast::<gio::File>().ok())
+                    else {
                         continue;
                     };
 
@@ -122,23 +126,17 @@ impl ConvertWidget {
                         continue;
                     };
 
-                    if let Some(self_ref) = weak_self.upgrade() {
-                        // Removed restrictive path check - allow any file
-                        if let Some(db) = db.borrow().as_ref() {
-                            match Self::add_document_from_path(&path, db, &list_box, &documents) {
-                                Ok(_) => {
-                                    tracing::info!(path = ?path, "File imported successfully");
-                                }
-                                Err(e) => {
-                                    tracing::error!(path = ?path, error = %e, "Failed to import file");
-                                    // Show error to user
-                                    if let Some(self_ref) = weak_self.upgrade() {
-                                        self_ref.imp().show_warning(
-                                            &window,
-                                            &format!("{}: {}", i18n::translate("IMPORT_FAILED"), e),
-                                        );
-                                    }
-                                }
+                    match Self::add_document_from_path(&path, &list_box, &documents) {
+                        Ok(_) => {
+                            tracing::info!(path = ?path, "File imported to convert list");
+                        }
+                        Err(e) => {
+                            tracing::error!(path = ?path, error = %e, "Failed to import file");
+                            if let Some(self_ref) = weak_self.upgrade() {
+                                self_ref.imp().show_warning(
+                                    &window,
+                                    &format!("{}: {}", i18n::translate("IMPORT_FAILED"), e),
+                                );
                             }
                         }
                     }
@@ -154,7 +152,8 @@ impl ConvertWidget {
     }
 
     #[template_callback]
-    fn on_directory_button_clicked(&self) {
+    pub fn on_directory_button_clicked(&self) {
+        tracing::info!("Directory button clicked");
         // Try to get parent window with fallback
         let window = self
             .obj()
@@ -183,7 +182,6 @@ impl ConvertWidget {
             Some(&i18n::translate("CANCEL")),
         );
 
-        let db = self.db.clone();
         let list_box = self.list_box.clone();
         let documents = self.documents.clone();
         let window = window.clone();
@@ -204,25 +202,23 @@ impl ConvertWidget {
                         return;
                     };
 
-                    if let Some(db) = db.borrow().as_ref() {
-                        tracing::info!(path = ?path, "Scanning directory for import");
-                        match DocumentScanner::scan_directory(&path, db) {
-                            Ok(docs) => {
-                                tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
-                                for doc in &docs {
-                                    let row = Self::create_expander_row(doc);
-                                    list_box.append(&row);
-                                }
-                                documents.borrow_mut().extend(docs);
+                    tracing::info!(path = ?path, "Scanning directory for convert list");
+                    match Self::scan_directory_local(&path) {
+                        Ok(docs) => {
+                            tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
+                            for doc in &docs {
+                                let row = Self::create_expander_row(doc);
+                                list_box.append(&row);
                             }
-                            Err(e) => {
-                                tracing::error!(path = ?path, error = %e, "Failed to scan directory");
-                                if let Some(self_ref) = weak_self.upgrade() {
-                                    self_ref.imp().show_warning(
-                                        &window,
-                                        &format!("{}: {}", i18n::translate("SCAN_FAILED"), e),
-                                    );
-                                }
+                            documents.borrow_mut().extend(docs);
+                        }
+                        Err(e) => {
+                            tracing::error!(path = ?path, error = %e, "Failed to scan directory");
+                            if let Some(self_ref) = weak_self.upgrade() {
+                                self_ref.imp().show_warning(
+                                    &window,
+                                    &format!("{}: {}", i18n::translate("SCAN_FAILED"), e),
+                                );
                             }
                         }
                     }
@@ -239,20 +235,13 @@ impl ConvertWidget {
 
     fn add_document_from_path(
         path: &std::path::Path,
-        db: &Database,
         list_box: &gtk::ListBox,
         documents: &RefCell<Vec<Document>>,
     ) -> anyhow::Result<()> {
         let path_str = path.to_str().unwrap_or_default();
-        if let Some(existing) = db.get_document_by_path(path_str)? {
-            let row = Self::create_expander_row(&existing);
-            list_box.append(&row);
-            documents.borrow_mut().push(existing);
-            return Ok(());
-        }
 
         let title = path
-            .file_stem()
+            .file_name()
             .and_then(|s| s.to_str())
             .unwrap_or("Unknown")
             .to_string();
@@ -270,18 +259,8 @@ impl ConvertWidget {
             _ => None,
         };
 
-        let id = db.insert_document(
-            &title,
-            Some("Unknown"),
-            &format,
-            path_str,
-            None,
-            file_size_bytes,
-            text_encoding.as_deref(),
-        )?;
-
         let doc = Document {
-            id,
+            id: -1,
             title,
             author: Some("Unknown".to_string()),
             format,
@@ -298,6 +277,51 @@ impl ConvertWidget {
         documents.borrow_mut().push(doc);
 
         Ok(())
+    }
+
+    fn scan_directory_local(dir: &std::path::Path) -> anyhow::Result<Vec<Document>> {
+        let span = tracing::span!(tracing::Level::DEBUG, "scan_directory_local", dir = ?dir);
+        let _enter = span.enter();
+        let mut documents = Vec::new();
+        if !dir.is_dir() {
+            return Ok(documents);
+        }
+        for entry in std::fs::read_dir(dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            if path.is_file() {
+                if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
+                    let ext_lower = ext.to_lowercase();
+                    if matches!(ext_lower.as_str(), "txt" | "epub" | "md" | "markdown") {
+                        let title = path
+                            .file_name()
+                            .and_then(|s| s.to_str())
+                            .unwrap_or("Unknown")
+                            .to_string();
+                        let format = DocumentScanner::normalize_format(&ext_lower);
+                        let file_size_bytes = std::fs::metadata(&path).ok().map(|m| m.len() as i64);
+                        let text_encoding = match ext_lower.as_str() {
+                            "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
+                            _ => None,
+                        };
+
+                        documents.push(Document {
+                            id: -1,
+                            title,
+                            author: Some("Unknown".to_string()),
+                            format,
+                            path: path.to_str().unwrap_or_default().to_string(),
+                            date_added: chrono::Utc::now().to_rfc3339(),
+                            last_opened: None,
+                            cover_path: None,
+                            file_size_bytes,
+                            text_encoding,
+                        });
+                    }
+                }
+            }
+        }
+        Ok(documents)
     }
 
     fn create_expander_row(doc: &Document) -> adw::ExpanderRow {
@@ -382,10 +406,10 @@ impl ConvertWidget {
     }
 
     pub fn update_ui_strings(&self) {
-        self.file_button.set_label(&i18n::translate("IMPORT_FILE"));
-        self.directory_button
-            .set_label(&i18n::translate("IMPORT_DIRECTORY"));
         self.convert_button.set_label(&i18n::translate("CONVERT"));
+        self.status_page.set_title(&i18n::translate("NO_FILES"));
+        self.status_page
+            .set_description(Some(&i18n::translate("IMPORT_FILES_TO_GET_STARTED")));
     }
 
     fn show_error_dialog(&self, title: &str, message: &str) {
@@ -419,17 +443,22 @@ impl ConvertWidget {
         dialog.show();
     }
 
-    fn is_path_allowed(&self, path: &std::path::Path) -> bool {
-        if let Some(home) = home_dir() {
-            path.starts_with(home)
-        } else {
-            true
-        }
-    }
-
     fn update_convert_button(&self) {
         let has_docs = !self.documents.borrow().is_empty();
+        tracing::debug!("update_convert_button: has_docs={}", has_docs);
         self.convert_button.set_sensitive(has_docs);
+
+        // Always show import overlay with buttons
+        self.import_overlay.set_visible(true);
+
+        // Switch between list and status pages in the stack
+        if has_docs {
+            tracing::debug!("Setting visible child to list");
+            self.content_stack.set_visible_child_name("list");
+        } else {
+            tracing::debug!("Setting visible child to status");
+            self.content_stack.set_visible_child_name("status");
+        }
     }
 }
 
@@ -470,6 +499,17 @@ impl ObjectImpl for ConvertWidget {
                 tracing::info!(format = %name, "Output format changed and saved");
             }
         });
+
+        // Initialize UI state
+        tracing::debug!(
+            "ConvertWidget constructed, documents count: {}",
+            self.documents.borrow().len()
+        );
+        self.update_convert_button();
+        tracing::debug!(
+            "Initial visible child: {:?}",
+            self.content_stack.visible_child_name()
+        );
     }
 }
 impl WidgetImpl for ConvertWidget {}

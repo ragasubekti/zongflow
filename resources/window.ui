@@ -7,15 +7,38 @@
       <object class="AdwToolbarView">
         <child type="top">
           <object class="AdwHeaderBar" id="header_bar">
-            <property name="title-widget">
-              <object class="AdwViewSwitcherTitle" id="view_switcher_title">
-                <property name="stack">stack</property>
+            <child type="start">
+              <object class="AdwSplitButton" id="import_button">
+                <property name="icon-name">list-add-symbolic</property>
+                <property name="label" translatable="yes">Import</property>
+                <property name="action-name">app.import-file</property>
+                <property name="tooltip-text" translatable="yes">Import</property>
+
               </object>
-            </property>
+            </child>
             <child type="end">
               <object class="GtkButton" id="settings_button">
                 <property name="icon-name">preferences-system-symbolic</property>
                 <property name="tooltip-text" translatable="yes">Settings</property>
+              </object>
+            </child>
+            <child type="end">
+              <object class="AdwToggleGroup" id="view_toggle_group">
+                <property name="visible">False</property>
+                <child>
+                  <object class="AdwToggle">
+                    <property name="icon-name">view-list-symbolic</property>
+                    <property name="name">list</property>
+                    <property name="tooltip" translatable="yes">List View</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="AdwToggle">
+                    <property name="icon-name">view-grid-symbolic</property>
+                    <property name="name">grid</property>
+                    <property name="tooltip" translatable="yes">Grid View</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>
@@ -35,4 +58,5 @@
       </object>
     </property>
   </template>
+
 </interface>

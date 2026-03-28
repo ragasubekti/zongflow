@@ -302,3 +302,42 @@ msgstr "設定"
 msgid "PATH_NOT_ALLOWED"
 msgstr "選択されたパスはホームディレクトリ外にあります。"
 
+msgid "IMPORT_FILE"
+msgstr "ファイルをインポート"
+
+msgid "IMPORT_DIRECTORY"
+msgstr "ディレクトリをインポート"
+
+msgid "ERROR"
+msgstr "エラー"
+
+msgid "WARNING"
+msgstr "警告"
+
+msgid "FILE_NOT_LOCAL"
+msgstr "ファイルがローカルでアクセスできません"
+
+msgid "FOLDER_NOT_LOCAL"
+msgstr "フォルダーがローカルでアクセスできません"
+
+msgid "IMPORT_FAILED"
+msgstr "インポートに失敗しました"
+
+msgid "SCAN_FAILED"
+msgstr "スキャンに失敗しました"
+
+msgid "NO_DOCUMENTS"
+msgstr "ドキュメントなし"
+
+msgid "ADD_DOCUMENTS_TO_LIBRARY"
+msgstr "ライブラリにドキュメントを追加して開始してください"
+
+msgid "ADD_DOCUMENTS_TO_TRANSLATE"
+msgstr "翻訳するドキュメントを追加してください"
+
+msgid "NO_FILES"
+msgstr "ファイルなし"
+
+msgid "IMPORT_FILES_TO_GET_STARTED"
+msgstr "ファイルまたはディレクトリをインポートして開始してください"
+

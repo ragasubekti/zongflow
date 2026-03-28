@@ -1,6 +1,8 @@
 mod imp;
 
 use crate::database::Database;
+use crate::window::ZongflowWindow;
+use glib::clone::Downgrade;
 use glib::Object;
 use gtk::glib;
 use gtk::subclass::prelude::ObjectSubclassIsExt;
@@ -19,6 +21,10 @@ impl SettingsWidget {
     pub fn set_db(&self, db: Database) {
         *self.imp().db.borrow_mut() = Some(db);
         self.imp().init_ui();
+    }
+
+    pub fn set_window(&self, window: &ZongflowWindow) {
+        *self.imp().window.borrow_mut() = Some(window.downgrade());
     }
 }
 

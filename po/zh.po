@@ -302,3 +302,42 @@ msgstr "设置"
 msgid "PATH_NOT_ALLOWED"
 msgstr "所选路径不在您的主目录中。"
 
+msgid "IMPORT_FILE"
+msgstr "导入文件"
+
+msgid "IMPORT_DIRECTORY"
+msgstr "导入目录"
+
+msgid "ERROR"
+msgstr "错误"
+
+msgid "WARNING"
+msgstr "警告"
+
+msgid "FILE_NOT_LOCAL"
+msgstr "文件无法本地访问"
+
+msgid "FOLDER_NOT_LOCAL"
+msgstr "文件夹无法本地访问"
+
+msgid "IMPORT_FAILED"
+msgstr "导入失败"
+
+msgid "SCAN_FAILED"
+msgstr "扫描失败"
+
+msgid "NO_DOCUMENTS"
+msgstr "没有文档"
+
+msgid "ADD_DOCUMENTS_TO_LIBRARY"
+msgstr "将文档添加到您的库中以开始使用"
+
+msgid "ADD_DOCUMENTS_TO_TRANSLATE"
+msgstr "添加文档以翻译"
+
+msgid "NO_FILES"
+msgstr "没有文件"
+
+msgid "IMPORT_FILES_TO_GET_STARTED"
+msgstr "导入文件或目录以开始使用"
+

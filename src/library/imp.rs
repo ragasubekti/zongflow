@@ -52,8 +52,8 @@ impl LibraryWidget {
         // --- ColumnView (list) ---
         let selection = gtk::NoSelection::new(Some(store.clone()));
         let column_view = gtk::ColumnView::new(Some(selection));
-        column_view.set_show_column_separators(true);
-        column_view.set_show_row_separators(true);
+        column_view.set_show_column_separators(false);
+        column_view.set_show_row_separators(false);
 
         // Cover column
         let cover_factory = gtk::SignalListItemFactory::new();
@@ -69,6 +69,7 @@ impl LibraryWidget {
             picture.set_height_request(48);
             picture.set_content_fit(gtk::ContentFit::Cover);
             picture.set_can_shrink(true);
+            picture.set_valign(gtk::Align::Center);
             item.set_child(Some(&picture));
         });
         cover_factory.connect_bind(|_, item| {
@@ -96,6 +97,7 @@ impl LibraryWidget {
         title_factory.connect_setup(|_, item| {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let vbox = gtk::Box::new(gtk::Orientation::Vertical, 2);
+            vbox.set_valign(gtk::Align::Center);
             let title_label = gtk::Label::new(None);
             title_label.set_halign(gtk::Align::Start);
             title_label.set_ellipsize(gtk::pango::EllipsizeMode::End);
@@ -133,6 +135,7 @@ impl LibraryWidget {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
             label.set_halign(gtk::Align::Start);
+            label.set_valign(gtk::Align::Center);
             label.set_ellipsize(gtk::pango::EllipsizeMode::End);
             item.set_child(Some(&label));
         });
@@ -152,6 +155,7 @@ impl LibraryWidget {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
             label.set_halign(gtk::Align::Start);
+            label.set_valign(gtk::Align::Center);
             item.set_child(Some(&label));
         });
         date_factory.connect_bind(|_, item| {
@@ -170,6 +174,7 @@ impl LibraryWidget {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
             label.set_halign(gtk::Align::End);
+            label.set_valign(gtk::Align::Center);
             item.set_child(Some(&label));
         });
         size_factory.connect_bind(|_, item| {
@@ -190,6 +195,7 @@ impl LibraryWidget {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let label = gtk::Label::new(None);
             label.set_halign(gtk::Align::Start);
+            label.set_valign(gtk::Align::Center);
             label.add_css_class("tag");
             item.set_child(Some(&label));
         });
@@ -214,7 +220,6 @@ impl LibraryWidget {
             let item = item.downcast_ref::<gtk::ListItem>().unwrap();
             let card = gtk::Box::new(gtk::Orientation::Vertical, 6);
             card.set_halign(gtk::Align::Center);
-            card.add_css_class("card");
             card.set_margin_top(4);
             card.set_margin_bottom(4);
             card.set_margin_start(4);
@@ -231,8 +236,7 @@ impl LibraryWidget {
             title_label.set_halign(gtk::Align::Center);
             title_label.set_ellipsize(gtk::pango::EllipsizeMode::End);
             title_label.set_max_width_chars(15);
-            title_label.add_css_class("caption");
-            title_label.add_css_class("bold");
+            title_label.add_css_class("title");
 
             let author_label = gtk::Label::new(None);
             author_label.set_halign(gtk::Align::Center);
@@ -240,15 +244,9 @@ impl LibraryWidget {
             author_label.add_css_class("dim-label");
             author_label.add_css_class("caption");
 
-            let meta_label = gtk::Label::new(None);
-            meta_label.set_halign(gtk::Align::Center);
-            meta_label.add_css_class("dim-label");
-            meta_label.add_css_class("caption");
-
             card.append(&picture);
             card.append(&title_label);
             card.append(&author_label);
-            card.append(&meta_label);
             item.set_child(Some(&card));
         });
 
@@ -259,10 +257,6 @@ impl LibraryWidget {
             let picture = card.first_child().and_downcast::<gtk::Picture>().unwrap();
             let title_lbl = picture.next_sibling().and_downcast::<gtk::Label>().unwrap();
             let author_lbl = title_lbl
-                .next_sibling()
-                .and_downcast::<gtk::Label>()
-                .unwrap();
-            let meta_lbl = author_lbl
                 .next_sibling()
                 .and_downcast::<gtk::Label>()
                 .unwrap();
@@ -277,14 +271,6 @@ impl LibraryWidget {
             }
             title_lbl.set_text(&obj.title());
             author_lbl.set_text(&obj.display_author());
-            let size = obj.format_size();
-            let fmt = obj.format();
-            let meta = if !size.is_empty() {
-                format!("{} · {}", size, fmt)
-            } else {
-                fmt.clone()
-            };
-            meta_lbl.set_text(&meta);
         });
 
         self.grid_scrolled.set_child(Some(&grid_view));
@@ -328,6 +314,8 @@ impl LibraryWidget {
     }
 
     pub fn update_ui_strings(&self) {
-        // No more title_label — window header title is used instead
+        self.status_page.set_title(&i18n::translate("NO_DOCUMENTS"));
+        self.status_page
+            .set_description(Some(&i18n::translate("ADD_DOCUMENTS_TO_LIBRARY")));
     }
 }

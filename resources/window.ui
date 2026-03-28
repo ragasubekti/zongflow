@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <interface domain="zongflow">
   <template class="ZongflowWindow" parent="AdwWindow">
+    <property name="default-width">900</property>
+    <property name="default-height">700</property>
     <property name="content">
       <object class="AdwToolbarView">
         <child type="top">

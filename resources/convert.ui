@@ -6,56 +6,98 @@
     <property name="vexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="AdwClamp">
-        <property name="maximum-size">600</property>
+      <object class="GtkBox">
+        <property name="orientation">horizontal</property>
+        <property name="spacing">12</property>
+        <property name="halign">center</property>
+        <property name="valign">start</property>
+        <property name="margin-top">12</property>
+        <property name="margin-bottom">12</property>
+        <property name="margin-start">12</property>
+        <property name="margin-end">12</property>
         <child>
-          <object class="GtkBox">
-            <property name="orientation">vertical</property>
-            <property name="spacing">12</property>
+          <object class="AdwToggleGroup" id="output_toggle">
             <property name="visible">True</property>
-            <property name="margin-top">24</property>
-            <property name="margin-bottom">24</property>
-            <property name="margin-start">24</property>
-            <property name="margin-end">24</property>
             <child>
-              <object class="GtkLabel" id="title_label">
-                <property name="label" translatable="yes">Convert</property>
-                <property name="halign">center</property>
-                <property name="css-classes">title-1</property>
+              <object class="AdwToggle">
+                <property name="label" translatable="yes">TXT</property>
+                <property name="name">txt</property>
               </object>
             </child>
             <child>
-              <object class="GtkLabel" id="subtitle_label">
-                <property name="label" translatable="yes">Select files or directories to convert</property>
-                <property name="halign">center</property>
-                <property name="sensitive">False</property>
+              <object class="AdwToggle">
+                <property name="label" translatable="yes">MD</property>
+                <property name="name">md</property>
               </object>
             </child>
             <child>
-              <object class="GtkBox">
-                <property name="orientation">horizontal</property>
-                <property name="spacing">6</property>
-                <property name="halign">center</property>
-                <child>
-                  <object class="GtkButton" id="file_button">
-                    <property name="label" translatable="yes">Pick File</property>
-                    <property name="halign">center</property>
-                  </object>
-                </child>
-                <child>
-                  <object class="GtkButton" id="directory_button">
-                    <property name="label" translatable="yes">Pick Directory</property>
-                    <property name="halign">center</property>
-                  </object>
-                </child>
+              <object class="AdwToggle">
+                <property name="label" translatable="yes">EPUB</property>
+                <property name="name">epub</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="convert_button">
+            <property name="label" translatable="yes">Convert</property>
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <style>
+              <class name="suggested-action"/>
+            </style>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="orientation">horizontal</property>
+      </object>
+    </child>
+    <child>
+      <object class="GtkOverlay" id="import_overlay">
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <child>
+          <object class="GtkScrolledWindow">
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <child>
+              <object class="GtkListBox" id="list_box">
+                <property name="visible">True</property>
+                <property name="selection-mode">none</property>
+                <style>
+                  <class name="boxed-list"/>
+                </style>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child type="overlay">
+          <object class="GtkBox">
+            <property name="halign">center</property>
+            <property name="valign">end</property>
+            <property name="margin-bottom">16</property>
+            <property name="spacing">8</property>
+            <child>
+              <object class="GtkButton" id="file_button">
+                <property name="label" translatable="yes">Import File</property>
+                <property name="visible">True</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="suggested-action"/>
+                </style>
               </object>
             </child>
             <child>
-              <object class="GtkLabel" id="selection_label">
-                <property name="label" translatable="yes">No selection</property>
-                <property name="halign">center</property>
-                <property name="wrap">True</property>
-                <property name="selectable">True</property>
+              <object class="GtkButton" id="directory_button">
+                <property name="label" translatable="yes">Import Directory</property>
+                <property name="visible">True</property>
+                <style>
+                  <class name="pill"/>
+                  <class name="suggested-action"/>
+                </style>
               </object>
             </child>
           </object>

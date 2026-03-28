@@ -11,7 +11,7 @@ pub struct DocumentScanner;
 
 impl DocumentScanner {
     /// Normalize format name to human-readable form
-    fn normalize_format(ext: &str) -> String {
+    pub fn normalize_format(ext: &str) -> String {
         match ext.to_lowercase().as_str() {
             "txt" => "Plain Text".to_string(),
             "md" | "markdown" => "Markdown".to_string(),

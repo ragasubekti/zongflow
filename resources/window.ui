@@ -10,6 +10,12 @@
                 <property name="title" translatable="yes">Zongflow</property>
               </object>
             </property>
+            <child type="end">
+              <object class="GtkButton" id="settings_button">
+                <property name="icon-name">preferences-system-symbolic</property>
+                <property name="tooltip-text" translatable="yes">Settings</property>
+              </object>
+            </child>
           </object>
         </child>
         <property name="content">

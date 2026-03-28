@@ -1,10 +1,10 @@
 use crate::core::SettingsManager;
 use crate::database::Database;
 use crate::i18n;
-use crate::window::ZongflowWindow;
 use adw::prelude::*;
 use glib::subclass::InitializingObject;
 use gtk::subclass::prelude::*;
+use adw::subclass::prelude::PreferencesPageImpl;
 use gtk::CompositeTemplate;
 use std::cell::Cell;
 use std::cell::RefCell;
@@ -75,12 +75,7 @@ pub struct SettingsWidget {
     #[template_child]
     pub reset_settings_button: TemplateChild<gtk::Button>,
     #[template_child]
-    pub about_button: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub save_button: TemplateChild<gtk::Button>,
-    #[template_child]
-    pub toast_overlay: TemplateChild<adw::ToastOverlay>,
-    pub db: RefCell<Option<Database>>,
+    pub about_button: TemplateChild<gtk::Button>,    pub db: RefCell<Option<Database>>,
     pending_language: RefCell<Option<String>>,
     pending_dark_mode: Cell<Option<bool>>,
     pending_output_folder: RefCell<Option<std::path::PathBuf>>,
@@ -91,7 +86,7 @@ pub struct SettingsWidget {
 impl ObjectSubclass for SettingsWidget {
     const NAME: &'static str = "SettingsWidget";
     type Type = super::SettingsWidget;
-    type ParentType = gtk::Box;
+    type ParentType = adw::PreferencesPage;
 
     fn class_init(klass: &mut Self::Class) {
         klass.bind_template();
@@ -156,74 +151,66 @@ impl SettingsWidget {
 
             imp.show_toast(&i18n::translate("SETTINGS_CHANGED_MESSAGE"));
         });
+    }
 
-        // Connect save button
-        let db_save = db.clone();
-        let this_for_save = self.obj().clone();
-        self.save_button.connect_clicked(move |_| {
-            let imp = this_for_save.imp();
-            let mut mgr = SettingsManager::new(db_save.clone());
-            let mut any_save_succeeded = false;
-            let mut language_changed = false;
+    /// Save all pending settings changes.
+    pub fn save_pending(&self) {
+        let db_borrow = self.db.borrow();
+        let Some(db) = db_borrow.as_ref() else { return };
+        let mut mgr = SettingsManager::new(db.clone());
+        let mut any_save_succeeded = false;
+        let mut language_changed = false;
 
-            // Save pending language change
-            if let Some(lang) = imp.pending_language.take() {
-                match mgr.set_language(&lang) {
-                    Ok(_) => {
-                        i18n::set_current_locale(&lang);
-                        any_save_succeeded = true;
-                        language_changed = true;
-                    }
-                    Err(e) => {
-                        *imp.pending_language.borrow_mut() = Some(lang);
-                        imp.show_toast(&format!("Failed to save language: {}", e));
-                    }
+        // Save pending language change
+        if let Some(lang) = self.pending_language.take() {
+            match mgr.set_language(&lang) {
+                Ok(_) => {
+                    i18n::set_current_locale(&lang);
+                    any_save_succeeded = true;
+                    language_changed = true;
+                }
+                Err(e) => {
+                    *self.pending_language.borrow_mut() = Some(lang);
+                    self.show_toast(&format!("Failed to save language: {}", e));
                 }
             }
+        }
 
-            // Save pending dark mode change
-            if let Some(dark_mode) = imp.pending_dark_mode.take() {
-                match mgr.set_dark_mode(dark_mode) {
-                    Ok(_) => {
-                        any_save_succeeded = true;
-                    }
-                    Err(e) => {
-                        imp.pending_dark_mode.set(Some(dark_mode));
-                        imp.show_toast(&format!("Failed to save dark mode: {}", e));
-                    }
+        // Save pending dark mode change
+        if let Some(dark_mode) = self.pending_dark_mode.take() {
+            match mgr.set_dark_mode(dark_mode) {
+                Ok(_) => {
+                    any_save_succeeded = true;
+                }
+                Err(e) => {
+                    self.pending_dark_mode.set(Some(dark_mode));
+                    self.show_toast(&format!("Failed to save dark mode: {}", e));
                 }
             }
+        }
 
-            // Save pending output folder change
-            if let Some(folder) = imp.pending_output_folder.take() {
-                match mgr.set_output_folder(&folder) {
-                    Ok(_) => {
-                        any_save_succeeded = true;
-                    }
-                    Err(e) => {
-                        *imp.pending_output_folder.borrow_mut() = Some(folder);
-                        imp.show_toast(&format!("Failed to save output folder: {}", e));
-                    }
+        // Save pending output folder change
+        if let Some(folder) = self.pending_output_folder.take() {
+            match mgr.set_output_folder(&folder) {
+                Ok(_) => {
+                    any_save_succeeded = true;
+                }
+                Err(e) => {
+                    *self.pending_output_folder.borrow_mut() = Some(folder);
+                    self.show_toast(&format!("Failed to save output folder: {}", e));
                 }
             }
+        }
 
-            // Update UI strings only if language changed successfully
-            if language_changed {
-                imp.refresh_language_dropdown();
-                imp.update_ui_strings();
+        // Update UI strings only if language changed successfully
+        if language_changed {
+            self.refresh_language_dropdown();
+            self.update_ui_strings();
+        }
 
-                if let Some(window) = this_for_save
-                    .root()
-                    .and_then(|w| w.downcast::<ZongflowWindow>().ok())
-                {
-                    window.update_ui_strings();
-                }
-            }
-
-            if any_save_succeeded {
-                imp.show_toast(&i18n::translate("SETTINGS_SAVED_MESSAGE"));
-            }
-        });
+        if any_save_succeeded {
+            self.show_toast(&i18n::translate("SETTINGS_SAVED_MESSAGE"));
+        }
     }
 
     /// Reset all widget names so set_names_from_tree can re-match from fresh titles.
@@ -298,8 +285,6 @@ impl SettingsWidget {
         self.reset_settings_button
             .set_label(&i18n::translate("RESET"));
         self.about_button.set_label(&i18n::translate("ABOUT"));
-        self.save_button.set_label(&i18n::translate("SAVE"));
-
         // Update preference group and row titles/subtitles via widget names
         if let Some(page) = self.obj().first_child() {
             self.update_widget_tree(&page);
@@ -394,7 +379,11 @@ impl SettingsWidget {
 
     fn show_toast(&self, message: &str) {
         let toast = adw::Toast::new(message);
-        self.toast_overlay.add_toast(toast);
+        if let Some(parent) = self.obj().parent() {
+            if let Some(dialog) = parent.downcast_ref::<adw::PreferencesDialog>() {
+                dialog.add_toast(toast);
+            }
+        }
     }
 
     #[template_callback]
@@ -507,4 +496,4 @@ impl SettingsWidget {
 
 impl ObjectImpl for SettingsWidget {}
 impl WidgetImpl for SettingsWidget {}
-impl BoxImpl for SettingsWidget {}
+impl PreferencesPageImpl for SettingsWidget {}

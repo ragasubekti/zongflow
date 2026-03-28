@@ -14,6 +14,8 @@ pub struct ZongflowWindow {
     pub header_bar: TemplateChild<adw::HeaderBar>,
     #[template_child]
     pub switcher_bar: TemplateChild<adw::ViewSwitcherBar>,
+    #[template_child]
+    pub settings_button: TemplateChild<gtk::Button>,
     pub db: RefCell<Option<Database>>,
 }
 
@@ -54,11 +56,6 @@ impl ZongflowWindow {
         if let Some(translate_page) = stack.child_by_name("translate") {
             let page = stack.page(&translate_page);
             page.set_title(Some(&i18n::translate("TRANSLATE")));
-        }
-
-        if let Some(settings_page) = stack.child_by_name("settings") {
-            let page = stack.page(&settings_page);
-            page.set_title(Some(&i18n::translate("SETTINGS")));
         }
     }
 }

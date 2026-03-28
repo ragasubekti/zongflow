@@ -35,6 +35,7 @@ impl ZongflowWindow {
         *window.imp().db.borrow_mut() = db;
 
         window.setup_pages();
+        window.setup_settings_button();
         window.update_ui_strings();
         window
     }
@@ -76,31 +77,33 @@ impl ZongflowWindow {
             "language",
         );
 
-        let settings = SettingsWidget::new();
-        if let Some(db) = db {
-            settings.set_db(db);
-        }
-        settings.set_visible(true);
-        stack.add_titled_with_icon(
-            &settings,
-            Some("settings"),
-            &i18n::translate("SETTINGS"),
-            "preferences-system",
-        );
-
         stack.set_visible_child_name("library");
+    }
+
+    fn setup_settings_button(&self) {
+        let db = self.imp().db.borrow().clone();
+        let button = self.imp().settings_button.get();
+        let window_weak = self.downgrade();
+
+        button.connect_clicked(move |_| {
+            let Some(window) = window_weak.upgrade() else { return };
+
+            let settings = SettingsWidget::new();
+            if let Some(db) = db.clone() {
+                settings.set_db(db);
+            }
+
+            let dialog = adw::PreferencesDialog::new();
+            dialog.set_title(&i18n::translate("SETTINGS"));
+            dialog.add(&settings);
+            dialog.present(Some(&window));
+        });
     }
 
     pub fn update_ui_strings(&self) {
         self.imp().update_ui_strings();
 
         // Update child widgets
-        if let Some(page) = self.imp().stack.child_by_name("settings") {
-            if let Ok(settings) = page.downcast::<SettingsWidget>() {
-                settings.imp().update_ui_strings();
-            }
-        }
-
         if let Some(page) = self.imp().stack.child_by_name("library") {
             if let Ok(library) = page.downcast::<LibraryWidget>() {
                 library.imp().update_ui_strings();

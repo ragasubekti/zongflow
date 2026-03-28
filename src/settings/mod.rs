@@ -7,8 +7,8 @@ use gtk::subclass::prelude::ObjectSubclassIsExt;
 
 glib::wrapper! {
     pub struct SettingsWidget(ObjectSubclass<imp::SettingsWidget>)
-        @extends gtk::Box, gtk::Widget,
-        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget, gtk::Orientable;
+        @extends adw::PreferencesPage, gtk::Widget,
+        @implements gtk::Accessible, gtk::Buildable, gtk::ConstraintTarget;
 }
 
 impl SettingsWidget {
@@ -19,6 +19,10 @@ impl SettingsWidget {
     pub fn set_db(&self, db: Database) {
         *self.imp().db.borrow_mut() = Some(db);
         self.imp().init_ui();
+    }
+
+    pub fn save_pending(&self) {
+        self.imp().save_pending();
     }
 }
 

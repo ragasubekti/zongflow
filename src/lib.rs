@@ -3,6 +3,7 @@ pub mod config;
 pub mod convert;
 pub mod core;
 pub mod database;
+pub mod document_object;
 pub mod i18n;
 pub mod library;
 pub mod settings;

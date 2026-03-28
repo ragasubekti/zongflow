@@ -1,52 +1,55 @@
 <?xml version="1.0" encoding="UTF-8"?>
   <interface domain="zongflow">
   <template class="LibraryWidget" parent="GtkBox">
-    <property name="visible">True</property>
-    <property name="hexpand">True</property>
-    <property name="vexpand">True</property>
     <property name="orientation">vertical</property>
-    <property name="spacing">12</property>
     <child>
-      <object class="GtkLabel" id="title_label">
-        <property name="label" translatable="yes">Library</property>
+      <object class="AdwViewSwitcher" id="view_switcher">
+        <property name="stack">view_stack</property>
+        <property name="policy">wide</property>
       </object>
     </child>
     <child>
-      <object class="GtkStack" id="view_stack">
-        <child>
-          <object class="GtkStackPage">
-            <property name="name">list_view</property>
+      <object class="GtkSeparator" id="separator">
+        <property name="orientation">horizontal</property>
+      </object>
+    </child>
+    <child>
+      <object class="AdwViewStack" id="view_stack">
+        <property name="hexpand">True</property>
+        <property name="vexpand">True</property>
+        <child type="titled">
+          <object class="AdwViewStackPage">
+            <property name="name">list</property>
+            <property name="title" translatable="yes">List</property>
+            <property name="icon-name">view-list-symbolic</property>
             <property name="child">
-              <object class="GtkScrolledWindow">
+              <object class="GtkScrolledWindow" id="list_scrolled">
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <child>
-                  <object class="GtkListBox" id="list_view">
-                    <property name="visible">True</property>
-                    <property name="selection-mode">single</property>
-                  </object>
-                </child>
               </object>
             </property>
           </object>
         </child>
-        <child>
-          <object class="GtkStackPage">
-            <property name="name">grid_view</property>
+        <child type="titled">
+          <object class="AdwViewStackPage">
+            <property name="name">grid</property>
+            <property name="title" translatable="yes">Grid</property>
+            <property name="icon-name">view-grid-symbolic</property>
             <property name="child">
-              <object class="GtkScrolledWindow">
+              <object class="GtkScrolledWindow" id="grid_scrolled">
                 <property name="hexpand">True</property>
                 <property name="vexpand">True</property>
-                <child>
-                  <object class="GtkIconView" id="grid_view">
-                    <property name="visible">True</property>
-                    <property name="selection-mode">single</property>
-                  </object>
-                </child>
               </object>
             </property>
           </object>
         </child>
+      </object>
+    </child>
+    <child>
+      <object class="AdwStatusPage" id="status_page">
+        <property name="title" translatable="yes">No Documents</property>
+        <property name="description" translatable="yes">Add documents to your library to get started</property>
+        <property name="icon-name">document-library-symbolic</property>
       </object>
     </child>
   </template>

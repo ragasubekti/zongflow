@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 adw = { package = "libadwaita", version = "0.9.1", features = ["v1_7"] }
-gtk = { package = "gtk4", version = "0.11.1" }
+gtk = { package = "gtk4", version = "0.11.1", features = ["v4_8"] }
 gio = "0.22.2"
 glib = "0.22.3"
 rusqlite = { version = "0.32", features = ["bundled"] }

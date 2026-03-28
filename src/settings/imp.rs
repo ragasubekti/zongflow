@@ -488,7 +488,7 @@ impl SettingsWidget {
 
     #[template_callback]
     fn on_about_button_clicked(&self) {
-        let about = adw::AboutWindow::builder()
+        let about = adw::AboutDialog::builder()
             .application_name(i18n::translate("APP_TITLE"))
             .application_icon("com.github.zongflow")
             .version(i18n::translate("VERSION"))
@@ -500,9 +500,8 @@ impl SettingsWidget {
             .root()
             .and_then(|w| w.downcast::<gtk::Window>().ok())
         {
-            about.set_transient_for(Some(&window));
+            about.present(Some(&window));
         }
-        about.present();
     }
 }
 

@@ -34,42 +34,14 @@ impl DocumentScanner {
                 if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
                     let ext_lower = ext.to_lowercase();
                     if matches!(ext_lower.as_str(), "txt" | "epub" | "md" | "markdown") {
-                        // Check if already in database
                         if let Some(existing) =
                             db.get_document_by_path(path.to_str().unwrap_or_default())?
                         {
                             documents.push(existing);
                         } else {
-                            // Extract metadata from file system
-                            let title = path
-                                .file_stem()
-                                .and_then(|s| s.to_str())
-                                .unwrap_or("Unknown")
-                                .to_string();
-                            let format = Self::normalize_format(&ext_lower);
+                            let mut doc = Document::from_path(&path);
+                            doc.id = 0; // will be assigned by database
 
-                            // Get file size from metadata
-                            let file_size_bytes = fs::metadata(&path).ok().map(|m| m.len() as i64);
-
-                            // Determine text encoding for text formats
-                            let text_encoding = match ext_lower.as_str() {
-                                "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
-                                _ => None, // Binary formats like EPUB don't have text encoding
-                            };
-
-                            let doc = Document {
-                                id: 0, // will be assigned by database
-                                title,
-                                author: Some("Unknown".to_string()),
-                                format,
-                                path: path.to_str().unwrap_or_default().to_string(),
-                                date_added: chrono::Utc::now().to_rfc3339(),
-                                last_opened: None,
-                                cover_path: None,
-                                file_size_bytes,
-                                text_encoding,
-                            };
-                            // Insert into database and retrieve with id
                             let id = db.insert_document(
                                 &doc.title,
                                 doc.author.as_deref(),

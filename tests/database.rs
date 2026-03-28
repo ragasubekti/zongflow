@@ -463,3 +463,59 @@ fn test_migration_adds_new_columns() {
     let docs = db.list_documents().unwrap();
     assert_eq!(docs.len(), 2);
 }
+
+#[test]
+fn test_document_format_size() {
+    use zongflow::database::Document;
+    assert_eq!(Document::format_size(None), "");
+    assert_eq!(Document::format_size(Some(0)), "");
+    assert_eq!(Document::format_size(Some(-100)), "");
+    assert_eq!(Document::format_size(Some(500)), "500 B");
+    assert_eq!(Document::format_size(Some(1024)), "1.0 KB");
+    assert_eq!(Document::format_size(Some(1536)), "1.5 KB");
+    assert_eq!(Document::format_size(Some(1024 * 1024)), "1.0 MB");
+    assert_eq!(Document::format_size(Some(1024 * 1024 * 1024)), "1.0 GB");
+    assert_eq!(
+        Document::format_size(Some(1024 * 1024 * 1024 * 2)),
+        "2.0 GB"
+    );
+}
+
+#[test]
+fn test_document_from_path() {
+    use std::io::Write;
+    use tempfile::tempdir;
+    use zongflow::core::DocumentScanner;
+    use zongflow::database::Document;
+
+    let dir = tempdir().unwrap();
+
+    // Create a temporary text file with .txt extension
+    let txt_path = dir.path().join("test.txt");
+    std::fs::write(&txt_path, "Hello, world!").unwrap();
+    let doc = Document::from_path(&txt_path);
+    assert_eq!(doc.id, 0);
+    assert_eq!(doc.title, "test");
+    assert_eq!(doc.author, Some("Unknown".to_string()));
+    assert_eq!(doc.format, "Plain Text");
+    assert_eq!(doc.path, txt_path.to_str().unwrap());
+    assert!(doc.file_size_bytes.is_some());
+    assert!(doc.file_size_bytes.unwrap() > 0);
+    assert_eq!(doc.text_encoding, Some("UTF-8".to_string()));
+
+    // Create a markdown file with .md extension
+    let md_path = dir.path().join("test.md");
+    std::fs::write(&md_path, "# Title").unwrap();
+    let md_doc = Document::from_path(&md_path);
+    assert_eq!(md_doc.title, "test");
+    assert_eq!(md_doc.format, "Markdown");
+    assert_eq!(md_doc.text_encoding, Some("UTF-8".to_string()));
+
+    // Create an epub file (binary) with .epub extension
+    let epub_path = dir.path().join("test.epub");
+    std::fs::write(&epub_path, vec![0x50, 0x4B, 0x03, 0x04]).unwrap();
+    let epub_doc = Document::from_path(&epub_path);
+    assert_eq!(epub_doc.title, "test");
+    assert_eq!(epub_doc.format, "EPUB");
+    assert_eq!(epub_doc.text_encoding, None);
+}

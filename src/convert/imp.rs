@@ -1,4 +1,3 @@
-use crate::core::DocumentScanner;
 use crate::database::{Database, Document};
 use crate::i18n;
 use adw::prelude::ExpanderRowExt;
@@ -52,16 +51,7 @@ impl ConvertWidget {
     #[template_callback]
     pub fn on_file_button_clicked(&self) {
         tracing::info!("File button clicked");
-        // Try to get parent window with fallback
-        let window = self
-            .obj()
-            .root()
-            .and_then(|w| w.downcast::<gtk::Window>().ok())
-            .or_else(|| {
-                self.obj()
-                    .ancestor(gtk::Window::static_type())
-                    .and_then(|w| w.downcast::<gtk::Window>().ok())
-            });
+        let window = self.get_parent_window();
 
         let Some(window) = window else {
             tracing::warn!("No parent window found for file chooser");
@@ -81,72 +71,22 @@ impl ConvertWidget {
             Some(&i18n::translate("CANCEL")),
         );
 
-        // Enable multiple file selection
         file_chooser.set_select_multiple(true);
 
-        let txt_filter = gtk::FileFilter::new();
-        txt_filter.set_name(Some(&i18n::translate("TEXT_FILES")));
-        txt_filter.add_mime_type("text/plain");
-        file_chooser.add_filter(&txt_filter);
-
-        let epub_filter = gtk::FileFilter::new();
-        epub_filter.set_name(Some(&i18n::translate("EPUB_FILES")));
-        epub_filter.add_mime_type("application/epub+zip");
-        file_chooser.add_filter(&epub_filter);
-
-        let md_filter = gtk::FileFilter::new();
-        md_filter.set_name(Some(&i18n::translate("MARKDOWN_FILES")));
-        md_filter.add_pattern("*.md");
-        md_filter.add_pattern("*.markdown");
-        file_chooser.add_filter(&md_filter);
+        self.add_file_filters(&file_chooser);
 
         let list_box = self.list_box.clone();
         let documents = self.documents.clone();
         let window = window.clone();
         let weak_self = self.obj().downgrade();
         file_chooser.connect_response(move |chooser, response| {
-            if response == gtk::ResponseType::Accept {
-                let files = chooser.files();
-                let n_items = files.n_items();
-                for i in 0..n_items {
-                    let Some(file) = files.item(i).and_then(|f| f.downcast::<gio::File>().ok())
-                    else {
-                        continue;
-                    };
-
-                    // Handle non-local URIs
-                    let Some(path) = file.path() else {
-                        tracing::warn!(uri = %file.uri(), "File has no local path, skipping");
-                        if let Some(self_ref) = weak_self.upgrade() {
-                            self_ref.imp().show_warning(
-                                &window,
-                                &format!("{}: {}", i18n::translate("FILE_NOT_LOCAL"), file.uri()),
-                            );
-                        }
-                        continue;
-                    };
-
-                    match Self::add_document_from_path(&path, &list_box, &documents) {
-                        Ok(_) => {
-                            tracing::info!(path = ?path, "File imported to convert list");
-                        }
-                        Err(e) => {
-                            tracing::error!(path = ?path, error = %e, "Failed to import file");
-                            if let Some(self_ref) = weak_self.upgrade() {
-                                self_ref.imp().show_warning(
-                                    &window,
-                                    &format!("{}: {}", i18n::translate("IMPORT_FAILED"), e),
-                                );
-                            }
-                        }
-                    }
-
-                    if let Some(self_ref) = weak_self.upgrade() {
-                        self_ref.imp().update_convert_button();
-                    }
-                }
+            if let Some(self_ref) = weak_self.upgrade() {
+                self_ref.imp().handle_file_chooser_response(
+                    chooser, response, &window, &list_box, &documents, &weak_self,
+                );
+            } else {
+                chooser.destroy();
             }
-            chooser.destroy();
         });
         file_chooser.show();
     }
@@ -154,16 +94,7 @@ impl ConvertWidget {
     #[template_callback]
     pub fn on_directory_button_clicked(&self) {
         tracing::info!("Directory button clicked");
-        // Try to get parent window with fallback
-        let window = self
-            .obj()
-            .root()
-            .and_then(|w| w.downcast::<gtk::Window>().ok())
-            .or_else(|| {
-                self.obj()
-                    .ancestor(gtk::Window::static_type())
-                    .and_then(|w| w.downcast::<gtk::Window>().ok())
-            });
+        let window = self.get_parent_window();
 
         let Some(window) = window else {
             tracing::warn!("No parent window found for directory chooser");
@@ -187,48 +118,13 @@ impl ConvertWidget {
         let window = window.clone();
         let weak_self = self.obj().downgrade();
         folder_chooser.connect_response(move |chooser, response| {
-            if response == gtk::ResponseType::Accept {
-                if let Some(folder) = chooser.file() {
-                    // Handle non-local URIs
-                    let Some(path) = folder.path() else {
-                        tracing::warn!(uri = %folder.uri(), "Folder has no local path");
-                        if let Some(self_ref) = weak_self.upgrade() {
-                            self_ref.imp().show_warning(
-                                &window,
-                                &format!("{}: {}", i18n::translate("FOLDER_NOT_LOCAL"), folder.uri()),
-                            );
-                        }
-                        chooser.destroy();
-                        return;
-                    };
-
-                    tracing::info!(path = ?path, "Scanning directory for convert list");
-                    match Self::scan_directory_local(&path) {
-                        Ok(docs) => {
-                            tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
-                            for doc in &docs {
-                                let row = Self::create_expander_row(doc);
-                                list_box.append(&row);
-                            }
-                            documents.borrow_mut().extend(docs);
-                        }
-                        Err(e) => {
-                            tracing::error!(path = ?path, error = %e, "Failed to scan directory");
-                            if let Some(self_ref) = weak_self.upgrade() {
-                                self_ref.imp().show_warning(
-                                    &window,
-                                    &format!("{}: {}", i18n::translate("SCAN_FAILED"), e),
-                                );
-                            }
-                        }
-                    }
-
-                    if let Some(self_ref) = weak_self.upgrade() {
-                        self_ref.imp().update_convert_button();
-                    }
-                }
+            if let Some(self_ref) = weak_self.upgrade() {
+                self_ref.imp().handle_folder_chooser_response(
+                    chooser, response, &window, &list_box, &documents, &weak_self,
+                );
+            } else {
+                chooser.destroy();
             }
-            chooser.destroy();
         });
         folder_chooser.show();
     }
@@ -238,39 +134,8 @@ impl ConvertWidget {
         list_box: &gtk::ListBox,
         documents: &RefCell<Vec<Document>>,
     ) -> anyhow::Result<()> {
-        let path_str = path.to_str().unwrap_or_default();
-
-        let title = path
-            .file_name()
-            .and_then(|s| s.to_str())
-            .unwrap_or("Unknown")
-            .to_string();
-
-        let ext = path
-            .extension()
-            .and_then(|e| e.to_str())
-            .unwrap_or("")
-            .to_lowercase();
-        let format = DocumentScanner::normalize_format(&ext);
-
-        let file_size_bytes = std::fs::metadata(path).ok().map(|m| m.len() as i64);
-        let text_encoding = match ext.as_str() {
-            "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
-            _ => None,
-        };
-
-        let doc = Document {
-            id: -1,
-            title,
-            author: Some("Unknown".to_string()),
-            format,
-            path: path_str.to_string(),
-            date_added: chrono::Utc::now().to_rfc3339(),
-            last_opened: None,
-            cover_path: None,
-            file_size_bytes,
-            text_encoding,
-        };
+        let mut doc = Document::from_path(path);
+        doc.id = -1; // temporary ID for conversion list
 
         let row = Self::create_expander_row(&doc);
         list_box.append(&row);
@@ -293,30 +158,9 @@ impl ConvertWidget {
                 if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
                     let ext_lower = ext.to_lowercase();
                     if matches!(ext_lower.as_str(), "txt" | "epub" | "md" | "markdown") {
-                        let title = path
-                            .file_name()
-                            .and_then(|s| s.to_str())
-                            .unwrap_or("Unknown")
-                            .to_string();
-                        let format = DocumentScanner::normalize_format(&ext_lower);
-                        let file_size_bytes = std::fs::metadata(&path).ok().map(|m| m.len() as i64);
-                        let text_encoding = match ext_lower.as_str() {
-                            "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
-                            _ => None,
-                        };
-
-                        documents.push(Document {
-                            id: -1,
-                            title,
-                            author: Some("Unknown".to_string()),
-                            format,
-                            path: path.to_str().unwrap_or_default().to_string(),
-                            date_added: chrono::Utc::now().to_rfc3339(),
-                            last_opened: None,
-                            cover_path: None,
-                            file_size_bytes,
-                            text_encoding,
-                        });
+                        let mut doc = Document::from_path(&path);
+                        doc.id = -1; // temporary ID for conversion list
+                        documents.push(doc);
                     }
                 }
             }
@@ -386,23 +230,139 @@ impl ConvertWidget {
     }
 
     fn format_size(bytes: Option<i64>) -> String {
-        let bytes = match bytes {
-            Some(b) if b > 0 => b,
-            _ => return String::new(),
-        };
-        const KB: f64 = 1024.0;
-        const MB: f64 = KB * 1024.0;
-        const GB: f64 = MB * 1024.0;
-        let b = bytes as f64;
-        if b >= GB {
-            format!("{:.1} GB", b / GB)
-        } else if b >= MB {
-            format!("{:.1} MB", b / MB)
-        } else if b >= KB {
-            format!("{:.1} KB", b / KB)
-        } else {
-            format!("{} B", bytes)
+        Document::format_size(bytes)
+    }
+
+    fn get_parent_window(&self) -> Option<gtk::Window> {
+        self.obj()
+            .root()
+            .and_then(|w| w.downcast::<gtk::Window>().ok())
+            .or_else(|| {
+                self.obj()
+                    .ancestor(gtk::Window::static_type())
+                    .and_then(|w| w.downcast::<gtk::Window>().ok())
+            })
+    }
+
+    fn add_file_filters(&self, file_chooser: &gtk::FileChooserNative) {
+        let txt_filter = gtk::FileFilter::new();
+        txt_filter.set_name(Some(&i18n::translate("TEXT_FILES")));
+        txt_filter.add_mime_type("text/plain");
+        file_chooser.add_filter(&txt_filter);
+
+        let epub_filter = gtk::FileFilter::new();
+        epub_filter.set_name(Some(&i18n::translate("EPUB_FILES")));
+        epub_filter.add_mime_type("application/epub+zip");
+        file_chooser.add_filter(&epub_filter);
+
+        let md_filter = gtk::FileFilter::new();
+        md_filter.set_name(Some(&i18n::translate("MARKDOWN_FILES")));
+        md_filter.add_pattern("*.md");
+        md_filter.add_pattern("*.markdown");
+        file_chooser.add_filter(&md_filter);
+    }
+
+    fn handle_file_chooser_response(
+        &self,
+        chooser: &gtk::FileChooserNative,
+        response: gtk::ResponseType,
+        window: &gtk::Window,
+        list_box: &gtk::ListBox,
+        documents: &RefCell<Vec<Document>>,
+        weak_self: &glib::WeakRef<super::ConvertWidget>,
+    ) {
+        if response == gtk::ResponseType::Accept {
+            let files = chooser.files();
+            let n_items = files.n_items();
+            for i in 0..n_items {
+                let Some(file) = files.item(i).and_then(|f| f.downcast::<gio::File>().ok()) else {
+                    continue;
+                };
+
+                let Some(path) = file.path() else {
+                    tracing::warn!(uri = %file.uri(), "File has no local path, skipping");
+                    if let Some(self_ref) = weak_self.upgrade() {
+                        self_ref.imp().show_warning(
+                            window,
+                            &format!("{}: {}", i18n::translate("FILE_NOT_LOCAL"), file.uri()),
+                        );
+                    }
+                    continue;
+                };
+
+                match Self::add_document_from_path(&path, list_box, documents) {
+                    Ok(_) => {
+                        tracing::info!(path = ?path, "File imported to convert list");
+                    }
+                    Err(e) => {
+                        tracing::error!(path = ?path, error = %e, "Failed to import file");
+                        if let Some(self_ref) = weak_self.upgrade() {
+                            self_ref.imp().show_warning(
+                                window,
+                                &format!("{}: {}", i18n::translate("IMPORT_FAILED"), e),
+                            );
+                        }
+                    }
+                }
+
+                if let Some(self_ref) = weak_self.upgrade() {
+                    self_ref.imp().update_convert_button();
+                }
+            }
         }
+        chooser.destroy();
+    }
+
+    fn handle_folder_chooser_response(
+        &self,
+        chooser: &gtk::FileChooserNative,
+        response: gtk::ResponseType,
+        window: &gtk::Window,
+        list_box: &gtk::ListBox,
+        documents: &RefCell<Vec<Document>>,
+        weak_self: &glib::WeakRef<super::ConvertWidget>,
+    ) {
+        if response == gtk::ResponseType::Accept {
+            if let Some(folder) = chooser.file() {
+                let Some(path) = folder.path() else {
+                    tracing::warn!(uri = %folder.uri(), "Folder has no local path");
+                    if let Some(self_ref) = weak_self.upgrade() {
+                        self_ref.imp().show_warning(
+                            window,
+                            &format!("{}: {}", i18n::translate("FOLDER_NOT_LOCAL"), folder.uri()),
+                        );
+                    }
+                    chooser.destroy();
+                    return;
+                };
+
+                tracing::info!(path = ?path, "Scanning directory for convert list");
+                match Self::scan_directory_local(&path) {
+                    Ok(docs) => {
+                        tracing::info!(path = ?path, count = docs.len(), "Directory scan completed");
+                        for doc in &docs {
+                            let row = Self::create_expander_row(doc);
+                            list_box.append(&row);
+                        }
+                        documents.borrow_mut().extend(docs);
+                    }
+                    Err(e) => {
+                        tracing::error!(path = ?path, error = %e, "Failed to scan directory");
+                        if let Some(self_ref) = weak_self.upgrade() {
+                            self_ref.imp().show_warning(
+                                window,
+                                &format!("{}: {}", i18n::translate("SCAN_FAILED"), e),
+                            );
+                        }
+                    }
+                }
+
+                if let Some(self_ref) = weak_self.upgrade() {
+                    self_ref.imp().update_convert_button();
+                }
+            }
+        }
+        chooser.destroy();
     }
 
     pub fn update_ui_strings(&self) {
@@ -448,10 +408,8 @@ impl ConvertWidget {
         tracing::debug!("update_convert_button: has_docs={}", has_docs);
         self.convert_button.set_sensitive(has_docs);
 
-        // Always show import overlay with buttons
         self.import_overlay.set_visible(true);
 
-        // Switch between list and status pages in the stack
         if has_docs {
             tracing::debug!("Setting visible child to list");
             self.content_stack.set_visible_child_name("list");

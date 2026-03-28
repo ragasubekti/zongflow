@@ -1,3 +1,4 @@
+use crate::core::DocumentScanner;
 use anyhow::{Context, Result};
 use dirs::data_dir;
 use rusqlite::{params, Connection};
@@ -250,4 +251,60 @@ pub struct Document {
     pub cover_path: Option<String>,
     pub file_size_bytes: Option<i64>,
     pub text_encoding: Option<String>,
+}
+
+impl Document {
+    /// Format file size in bytes to human-readable string (KB, MB, GB)
+    pub fn format_size(bytes: Option<i64>) -> String {
+        let bytes = match bytes {
+            Some(b) if b > 0 => b,
+            _ => return String::new(),
+        };
+        const KB: f64 = 1024.0;
+        const MB: f64 = KB * 1024.0;
+        const GB: f64 = MB * 1024.0;
+        let b = bytes as f64;
+        if b >= GB {
+            format!("{:.1} GB", b / GB)
+        } else if b >= MB {
+            format!("{:.1} MB", b / MB)
+        } else if b >= KB {
+            format!("{:.1} KB", b / KB)
+        } else {
+            format!("{} B", bytes)
+        }
+    }
+
+    /// Create a Document from a file path with default metadata
+    pub fn from_path(path: &std::path::Path) -> Self {
+        let path_str = path.to_str().unwrap_or_default().to_string();
+        let title = path
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap_or("Unknown")
+            .to_string();
+        let ext = path
+            .extension()
+            .and_then(|e| e.to_str())
+            .unwrap_or("")
+            .to_lowercase();
+        let format = DocumentScanner::normalize_format(&ext);
+        let file_size_bytes = std::fs::metadata(path).ok().map(|m| m.len() as i64);
+        let text_encoding = match ext.as_str() {
+            "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
+            _ => None,
+        };
+        Document {
+            id: 0,
+            title,
+            author: Some("Unknown".to_string()),
+            format,
+            path: path_str,
+            date_added: chrono::Utc::now().to_rfc3339(),
+            last_opened: None,
+            cover_path: None,
+            file_size_bytes,
+            text_encoding,
+        }
+    }
 }

@@ -1,5 +1,6 @@
 use std::cell::RefCell;
 
+use crate::database::Document;
 use chrono::DateTime;
 use glib::prelude::*;
 use glib::subclass::prelude::*;
@@ -95,23 +96,7 @@ impl DocumentObject {
 
     /// Format file size to human-readable string
     pub fn format_size(&self) -> String {
-        let bytes = self.file_size_bytes();
-        if bytes <= 0 {
-            return String::new();
-        }
-        const KB: f64 = 1024.0;
-        const MB: f64 = KB * 1024.0;
-        const GB: f64 = MB * 1024.0;
-        let b = bytes as f64;
-        if b >= GB {
-            format!("{:.1} GB", b / GB)
-        } else if b >= MB {
-            format!("{:.1} MB", b / MB)
-        } else if b >= KB {
-            format!("{:.1} KB", b / KB)
-        } else {
-            format!("{} B", bytes)
-        }
+        Document::format_size(Some(self.file_size_bytes()))
     }
 
     /// Format date to human-readable: "23 May 2025 22:44"

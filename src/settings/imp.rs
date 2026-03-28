@@ -100,6 +100,18 @@ impl ObjectSubclass for SettingsWidget {
 
 #[gtk::template_callbacks]
 impl SettingsWidget {
+    fn traverse_widgets<F>(&self, widget: &gtk::Widget, visitor: &F)
+    where
+        F: Fn(&gtk::Widget),
+    {
+        visitor(widget);
+        let mut child = widget.first_child();
+        while let Some(c) = child {
+            self.traverse_widgets(&c, visitor);
+            child = c.next_sibling();
+        }
+    }
+
     pub fn init_ui(&self) {
         let db_borrow = self.db.borrow();
         let Some(db) = db_borrow.as_ref() else { return };
@@ -119,7 +131,6 @@ impl SettingsWidget {
         // Dark mode switch
         self.dark_mode_switch.set_active(mgr.get_dark_mode());
 
-        // Update all UI strings with current language
         self.update_ui_strings();
 
         // Manually connect output folder button signal as fallback
@@ -221,44 +232,36 @@ impl SettingsWidget {
     /// Called once during init_ui before any translation occurs.
     fn set_names_from_tree(&self, widget: &gtk::Widget) {
         let title_names = TITLE_NAMES;
-
-        if let Some(group) = widget.downcast_ref::<adw::PreferencesGroup>() {
-            let title = group.title().to_string();
-            for (en, name) in &title_names {
-                if title == *en {
-                    group.set_widget_name(name);
-                    break;
-                }
-            }
-        }
-
-        if let Some(row) = widget.downcast_ref::<adw::ActionRow>() {
-            let title = row.title().to_string();
-            for (en, name) in &title_names {
-                if title == *en {
-                    row.set_widget_name(name);
-                    break;
-                }
-            }
-            if let Some(subtitle) = row.subtitle() {
-                let sub = subtitle.to_string();
-                for (en, _name) in &title_names {
-                    if sub == *en {
+        self.traverse_widgets(widget, &|w| {
+            if let Some(group) = w.downcast_ref::<adw::PreferencesGroup>() {
+                let title = group.title().to_string();
+                for (en, name) in &title_names {
+                    if title == *en {
+                        group.set_widget_name(name);
                         break;
                     }
                 }
             }
-            // Also traverse into action row suffix children
-            if let Some(child) = row.first_child() {
-                self.set_names_from_tree(&child);
-            }
-        }
 
-        let mut child = widget.first_child();
-        while let Some(c) = child {
-            self.set_names_from_tree(&c);
-            child = c.next_sibling();
-        }
+            if let Some(row) = w.downcast_ref::<adw::ActionRow>() {
+                let title = row.title().to_string();
+                for (en, name) in &title_names {
+                    if title == *en {
+                        row.set_widget_name(name);
+                        break;
+                    }
+                }
+                if let Some(subtitle) = row.subtitle() {
+                    let sub = subtitle.to_string();
+                    for (en, _name) in &title_names {
+                        if sub == *en {
+                            break;
+                        }
+                    }
+                }
+                // Traversal will automatically visit children (suffix)
+            }
+        });
     }
 
     pub fn update_ui_strings(&self) {
@@ -282,51 +285,45 @@ impl SettingsWidget {
     fn update_widget_tree(&self, widget: &gtk::Widget) {
         // Title translation map
         let title_translations = &TITLE_TRANSLATIONS;
-
         // Subtitle translation map (key prefix -> translation key)
         let subtitle_translations = &SUBTITLE_TRANSLATIONS;
 
-        if let Some(group) = widget.downcast_ref::<adw::PreferencesGroup>() {
-            let name = group.widget_name();
-            let name_str = name.as_str();
-            if !name_str.is_empty() {
-                for (key, translation_key) in title_translations {
-                    if name_str == *key {
-                        group.set_title(&i18n::translate(translation_key));
-                        break;
+        self.traverse_widgets(widget, &|w| {
+            if let Some(group) = w.downcast_ref::<adw::PreferencesGroup>() {
+                let name = group.widget_name();
+                let name_str = name.as_str();
+                if !name_str.is_empty() {
+                    for (key, translation_key) in title_translations {
+                        if name_str == *key {
+                            group.set_title(&i18n::translate(translation_key));
+                            break;
+                        }
                     }
                 }
             }
-        }
 
-        if let Some(row) = widget.downcast_ref::<adw::ActionRow>() {
-            let name = row.widget_name();
-            let name_str = name.as_str();
-            if !name_str.is_empty() {
-                // Translate title
-                for (key, translation_key) in title_translations {
-                    if name_str == *key {
-                        row.set_title(&i18n::translate(translation_key));
-                        break;
+            if let Some(row) = w.downcast_ref::<adw::ActionRow>() {
+                let name = row.widget_name();
+                let name_str = name.as_str();
+                if !name_str.is_empty() {
+                    // Translate title
+                    for (key, translation_key) in title_translations {
+                        if name_str == *key {
+                            row.set_title(&i18n::translate(translation_key));
+                            break;
+                        }
                     }
-                }
 
-                // Translate subtitle
-                for (key_prefix, translation_key) in subtitle_translations {
-                    if name_str == *key_prefix {
-                        row.set_subtitle(&i18n::translate(translation_key));
-                        break;
+                    // Translate subtitle
+                    for (key_prefix, translation_key) in subtitle_translations {
+                        if name_str == *key_prefix {
+                            row.set_subtitle(&i18n::translate(translation_key));
+                            break;
+                        }
                     }
                 }
             }
-        }
-
-        // Recursively update children
-        let mut child = widget.first_child();
-        while let Some(child_widget) = child {
-            self.update_widget_tree(&child_widget);
-            child = child_widget.next_sibling();
-        }
+        });
     }
 
     fn update_language_dropdown(&self, _languages: &[&str]) {

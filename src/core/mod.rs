@@ -10,6 +10,16 @@ pub use settings_file::Settings;
 pub struct DocumentScanner;
 
 impl DocumentScanner {
+    /// Normalize format name to human-readable form
+    fn normalize_format(ext: &str) -> String {
+        match ext.to_lowercase().as_str() {
+            "txt" => "Plain Text".to_string(),
+            "md" | "markdown" => "Markdown".to_string(),
+            "epub" => "EPUB".to_string(),
+            other => other.to_string(),
+        }
+    }
+
     pub fn scan_directory(dir: &Path, db: &Database) -> Result<Vec<Document>> {
         let span = tracing::span!(tracing::Level::DEBUG, "scan_directory", dir = ?dir);
         let _enter = span.enter();
@@ -30,22 +40,36 @@ impl DocumentScanner {
                         {
                             documents.push(existing);
                         } else {
-                            // Extract metadata (basic)
+                            // Extract metadata from file system
                             let title = path
                                 .file_stem()
                                 .and_then(|s| s.to_str())
                                 .unwrap_or("Unknown")
                                 .to_string();
-                            let format = ext_lower;
+                            let format = Self::normalize_format(&ext_lower);
+                            
+                            // Get file size from metadata
+                            let file_size_bytes = fs::metadata(&path)
+                                .ok()
+                                .map(|m| m.len() as i64);
+                            
+                            // Determine text encoding for text formats
+                            let text_encoding = match ext_lower.as_str() {
+                                "txt" | "md" | "markdown" => Some("UTF-8".to_string()),
+                                _ => None, // Binary formats like EPUB don't have text encoding
+                            };
+                            
                             let doc = Document {
                                 id: 0, // will be assigned by database
                                 title,
-                                author: None,
+                                author: Some("Unknown".to_string()),
                                 format,
                                 path: path.to_str().unwrap_or_default().to_string(),
                                 date_added: chrono::Utc::now().to_rfc3339(),
                                 last_opened: None,
                                 cover_path: None,
+                                file_size_bytes,
+                                text_encoding,
                             };
                             // Insert into database and retrieve with id
                             let id = db.insert_document(
@@ -54,6 +78,8 @@ impl DocumentScanner {
                                 &doc.format,
                                 &doc.path,
                                 doc.cover_path.as_deref(),
+                                doc.file_size_bytes,
+                                doc.text_encoding.as_deref(),
                             )?;
                             let mut doc_with_id = doc;
                             doc_with_id.id = id;

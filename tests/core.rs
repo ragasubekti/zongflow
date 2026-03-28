@@ -17,7 +17,7 @@ fn test_document_scanner() {
     let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
     let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
     assert_eq!(docs.len(), 2);
-    assert!(docs.iter().all(|d| d.format == "txt" || d.format == "md"));
+    assert!(docs.iter().all(|d| d.format == "Plain Text" || d.format == "Markdown"));
 }
 
 #[test]
@@ -69,7 +69,7 @@ fn test_scanner_detects_epub() {
     let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
     let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
     assert_eq!(docs.len(), 1);
-    assert_eq!(docs[0].format, "epub");
+    assert_eq!(docs[0].format, "EPUB");
     assert_eq!(docs[0].title, "book");
 }
 

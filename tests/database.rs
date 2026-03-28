@@ -55,7 +55,7 @@ fn test_document_crud() {
 
     // Insert a document
     let doc_id = db
-        .insert_document("Test Doc", Some("Author"), "txt", "/path/to/doc.txt", None)
+        .insert_document("Test Doc", Some("Author"), "txt", "/path/to/doc.txt", None, Some(1024), Some("UTF-8"))
         .unwrap();
     assert!(doc_id > 0);
 
@@ -67,6 +67,8 @@ fn test_document_crud() {
     assert_eq!(doc.title, "Test Doc");
     assert_eq!(doc.author, Some("Author".to_string()));
     assert_eq!(doc.format, "txt");
+    assert_eq!(doc.file_size_bytes, Some(1024));
+    assert_eq!(doc.text_encoding, Some("UTF-8".to_string()));
 
     // Update last opened
     db.update_document_last_opened("/path/to/doc.txt").unwrap();
@@ -85,9 +87,9 @@ fn test_document_crud() {
     assert_eq!(db.get_document_by_path("/path/to/doc.txt").unwrap(), None);
 
     // Clear all documents
-    db.insert_document("Doc1", None, "md", "/doc1.md", None)
+    db.insert_document("Doc1", None, "md", "/doc1.md", None, None, None)
         .unwrap();
-    db.insert_document("Doc2", None, "epub", "/doc2.epub", None)
+    db.insert_document("Doc2", None, "epub", "/doc2.epub", None, None, None)
         .unwrap();
     db.clear_documents().unwrap();
     assert_eq!(db.list_documents().unwrap().len(), 0);
@@ -98,9 +100,9 @@ fn test_duplicate_path_insert_fails() {
     let dir = tempdir().unwrap();
     let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
 
-    db.insert_document("Doc1", None, "txt", "/same/path.txt", None)
+    db.insert_document("Doc1", None, "txt", "/same/path.txt", None, None, None)
         .unwrap();
-    let result = db.insert_document("Doc2", None, "md", "/same/path.txt", None);
+    let result = db.insert_document("Doc2", None, "md", "/same/path.txt", None, None, None);
     assert!(result.is_err());
 }
 
@@ -110,7 +112,7 @@ fn test_insert_document_with_all_none_optionals() {
     let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
 
     let id = db
-        .insert_document("Minimal Doc", None, "txt", "/minimal.txt", None)
+        .insert_document("Minimal Doc", None, "txt", "/minimal.txt", None, None, None)
         .unwrap();
     assert!(id > 0);
 
@@ -137,7 +139,7 @@ fn test_clone_shares_connection() {
     let db_clone = db.clone();
 
     // Insert via original
-    db.insert_document("Shared", None, "txt", "/shared.txt", None)
+    db.insert_document("Shared", None, "txt", "/shared.txt", None, None, None)
         .unwrap();
 
     // Retrieve via clone
@@ -157,13 +159,13 @@ fn test_list_documents_ordering() {
 
     // Insert documents
     let _id1 = db
-        .insert_document("Doc1", None, "txt", "/doc1.txt", None)
+        .insert_document("Doc1", None, "txt", "/doc1.txt", None, None, None)
         .unwrap();
     let id2 = db
-        .insert_document("Doc2", None, "txt", "/doc2.txt", None)
+        .insert_document("Doc2", None, "txt", "/doc2.txt", None, None, None)
         .unwrap();
     let id3 = db
-        .insert_document("Doc3", None, "txt", "/doc3.txt", None)
+        .insert_document("Doc3", None, "txt", "/doc3.txt", None, None, None)
         .unwrap();
 
     // Update last_opened for doc2 and doc3 (doc1 remains NULL)
@@ -192,6 +194,8 @@ fn test_unicode_characters_in_document() {
             "txt",
             "/path/to/日本語.txt",
             None,
+            None,
+            None,
         )
         .unwrap();
     assert!(id > 0);
@@ -211,7 +215,7 @@ fn test_empty_string_values() {
 
     // Empty title should work
     let id = db
-        .insert_document("", None, "txt", "/empty_title.txt", None)
+        .insert_document("", None, "txt", "/empty_title.txt", None, None, None)
         .unwrap();
     assert!(id > 0);
 
@@ -244,7 +248,7 @@ fn test_document_with_long_path() {
 
     let long_path = "/very/long/path/".repeat(50) + "document.txt";
     let id = db
-        .insert_document("Long Path Doc", None, "txt", &long_path, None)
+        .insert_document("Long Path Doc", None, "txt", &long_path, None, None, None)
         .unwrap();
     assert!(id > 0);
 
@@ -297,10 +301,133 @@ fn test_document_with_special_characters_in_path() {
 
     let special_path = "/path/with spaces/and-dashes_under.txt";
     let id = db
-        .insert_document("Special Path", None, "txt", special_path, None)
+        .insert_document("Special Path", None, "txt", special_path, None, None, None)
         .unwrap();
     assert!(id > 0);
 
     let doc = db.get_document_by_path(special_path).unwrap().unwrap();
     assert_eq!(doc.path, special_path);
+}
+
+#[test]
+fn test_file_size_bytes_persistence() {
+    let dir = tempdir().unwrap();
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+
+    // Insert document with file size
+    let id = db
+        .insert_document("Sized Doc", None, "txt", "/sized.txt", None, Some(2048), Some("UTF-8"))
+        .unwrap();
+    assert!(id > 0);
+
+    // Verify file size is persisted
+    let doc = db.get_document_by_path("/sized.txt").unwrap().unwrap();
+    assert_eq!(doc.file_size_bytes, Some(2048));
+    assert_eq!(doc.text_encoding, Some("UTF-8".to_string()));
+
+    // Verify in list as well
+    let docs = db.list_documents().unwrap();
+    assert_eq!(docs.len(), 1);
+    assert_eq!(docs[0].file_size_bytes, Some(2048));
+    assert_eq!(docs[0].text_encoding, Some("UTF-8".to_string()));
+}
+
+#[test]
+fn test_file_size_bytes_none_persistence() {
+    let dir = tempdir().unwrap();
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+
+    // Insert document without file size (None)
+    let id = db
+        .insert_document("Unsized Doc", None, "md", "/unsized.md", None, None, None)
+        .unwrap();
+    assert!(id > 0);
+
+    // Verify file size is None
+    let doc = db.get_document_by_path("/unsized.md").unwrap().unwrap();
+    assert_eq!(doc.file_size_bytes, None);
+    assert_eq!(doc.text_encoding, None);
+}
+
+#[test]
+fn test_text_encoding_persistence() {
+    let dir = tempdir().unwrap();
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+
+    // Insert document with text encoding
+    let id = db
+        .insert_document("Encoded Doc", None, "txt", "/encoded.txt", None, Some(1024), Some("UTF-16"))
+        .unwrap();
+    assert!(id > 0);
+
+    // Verify text encoding is persisted
+    let doc = db.get_document_by_path("/encoded.txt").unwrap().unwrap();
+    assert_eq!(doc.text_encoding, Some("UTF-16".to_string()));
+    assert_eq!(doc.file_size_bytes, Some(1024));
+}
+
+#[test]
+fn test_migration_adds_new_columns() {
+    let dir = tempdir().unwrap();
+    let db_path = dir.path().join("test.db");
+    
+    // Create a database with the old schema (without file_size_bytes and text_encoding)
+    {
+        let conn = rusqlite::Connection::open(&db_path).unwrap();
+        conn.execute_batch(
+            "
+            CREATE TABLE IF NOT EXISTS settings (
+                key TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
+            CREATE TABLE IF NOT EXISTS documents (
+                id INTEGER PRIMARY KEY,
+                title TEXT NOT NULL,
+                author TEXT,
+                format TEXT NOT NULL,
+                path TEXT UNIQUE NOT NULL,
+                date_added TEXT NOT NULL,
+                last_opened TEXT,
+                cover_path TEXT
+            );
+            ",
+        )
+        .unwrap();
+        
+        // Insert a document with the old schema
+        conn.execute(
+            "INSERT INTO documents (title, author, format, path, date_added, cover_path) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
+            rusqlite::params!["Old Doc", Some("Author"), "txt", "/old.txt", "2024-01-01T00:00:00Z", Option::<String>::None],
+        )
+        .unwrap();
+    }
+    
+    // Now open the database with the new code - this should trigger migration
+    let db = Database::new_with_path(db_path).unwrap();
+    
+    // Verify the old document is still accessible
+    let doc = db.get_document_by_path("/old.txt").unwrap().unwrap();
+    assert_eq!(doc.title, "Old Doc");
+    assert_eq!(doc.author, Some("Author".to_string()));
+    assert_eq!(doc.format, "txt");
+    
+    // The new columns should be None for the old document
+    assert_eq!(doc.file_size_bytes, None);
+    assert_eq!(doc.text_encoding, None);
+    
+    // Insert a new document with the new columns
+    let id = db
+        .insert_document("New Doc", None, "md", "/new.md", None, Some(512), Some("UTF-8"))
+        .unwrap();
+    assert!(id > 0);
+    
+    // Verify the new document has the new columns populated
+    let new_doc = db.get_document_by_path("/new.md").unwrap().unwrap();
+    assert_eq!(new_doc.title, "New Doc");
+    assert_eq!(new_doc.file_size_bytes, Some(512));
+    assert_eq!(new_doc.text_encoding, Some("UTF-8".to_string()));
+    
+    // Verify both documents are in the list
+    let docs = db.list_documents().unwrap();
+    assert_eq!(docs.len(), 2);
 }

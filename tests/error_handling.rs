@@ -18,12 +18,14 @@ fn test_database_connection_error_handling() {
             "txt",
             "/test/path.txt",
             None,
+            None,
+            None,
         )
         .unwrap();
     assert!(id > 0);
 
     // Try to insert duplicate path (should fail)
-    let result = db.insert_document("Another Document", None, "txt", "/test/path.txt", None);
+    let result = db.insert_document("Another Document", None, "txt", "/test/path.txt", None, None, None);
     assert!(result.is_err());
 
     // Error should contain context
@@ -96,6 +98,8 @@ fn test_database_edge_cases() -> Result<()> {
         "epub",
         "/path/to/document.epub",
         Some("/path/to/cover.jpg"),
+        None,
+        None,
     )?;
 
     let doc = db.get_document_by_path("/path/to/document.epub")?.unwrap();

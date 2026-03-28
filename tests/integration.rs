@@ -18,7 +18,7 @@ fn test_scan_directory_inserts_into_db() {
     let db_docs = db.list_documents().unwrap();
     assert_eq!(db_docs.len(), 1);
     assert_eq!(db_docs[0].title, "test");
-    assert_eq!(db_docs[0].format, "txt");
+    assert_eq!(db_docs[0].format, "Plain Text");
 }
 
 #[test]
@@ -35,9 +35,9 @@ fn test_scan_directory_multiple_files() {
     assert_eq!(docs.len(), 3);
 
     let formats: Vec<&str> = docs.iter().map(|d| d.format.as_str()).collect();
-    assert!(formats.contains(&"txt"));
-    assert!(formats.contains(&"md"));
-    assert!(formats.contains(&"epub"));
+    assert!(formats.contains(&"Plain Text"));
+    assert!(formats.contains(&"Markdown"));
+    assert!(formats.contains(&"EPUB"));
 }
 
 #[test]
@@ -64,9 +64,9 @@ fn test_database_duplicate_path_fails() {
     let dir = tempdir().unwrap();
     let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
 
-    db.insert_document("Doc1", None, "txt", "/same/path.txt", None)
+    db.insert_document("Doc1", None, "txt", "/same/path.txt", None, None, None)
         .unwrap();
-    let result = db.insert_document("Doc2", None, "md", "/same/path.txt", None);
+    let result = db.insert_document("Doc2", None, "md", "/same/path.txt", None, None, None);
     assert!(result.is_err());
 }
 
@@ -225,6 +225,8 @@ fn test_document_with_unicode_metadata() {
             "txt",
             "/path/to/日本語.txt",
             None,
+            None,
+            None,
         )
         .unwrap();
 
@@ -235,4 +237,86 @@ fn test_document_with_unicode_metadata() {
     assert_eq!(doc.title, "日本語ドキュメント");
     assert_eq!(doc.author, Some("著者名".to_string()));
     assert_eq!(doc.id, id);
+}
+
+#[test]
+fn test_scan_directory_populates_file_size() {
+    let dir = tempdir().unwrap();
+    let content = "Hello, world!";
+    std::fs::write(dir.path().join("test.txt"), content).unwrap();
+
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+    let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
+    assert_eq!(docs.len(), 1);
+
+    // Verify file size is populated
+    let doc = &docs[0];
+    assert_eq!(doc.file_size_bytes, Some(content.len() as i64));
+    assert_eq!(doc.title, "test");
+    assert_eq!(doc.format, "Plain Text");
+}
+
+#[test]
+fn test_scan_directory_populates_text_encoding_for_text_formats() {
+    let dir = tempdir().unwrap();
+    std::fs::write(dir.path().join("doc.txt"), "content").unwrap();
+    std::fs::write(dir.path().join("readme.md"), "# Title").unwrap();
+    std::fs::write(dir.path().join("book.epub"), "epub data").unwrap();
+
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+    let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
+    assert_eq!(docs.len(), 3);
+
+    // Find each document
+    let txt_doc = docs.iter().find(|d| d.title == "doc").unwrap();
+    let md_doc = docs.iter().find(|d| d.title == "readme").unwrap();
+    let epub_doc = docs.iter().find(|d| d.title == "book").unwrap();
+
+    // Verify text encoding for text formats
+    assert_eq!(txt_doc.text_encoding, Some("UTF-8".to_string()));
+    assert_eq!(md_doc.text_encoding, Some("UTF-8".to_string()));
+
+    // EPUB should have no text encoding (binary format)
+    assert_eq!(epub_doc.text_encoding, None);
+}
+
+#[test]
+fn test_scan_directory_normalizes_format_names() {
+    let dir = tempdir().unwrap();
+    std::fs::write(dir.path().join("doc.txt"), "content").unwrap();
+    std::fs::write(dir.path().join("readme.md"), "# Title").unwrap();
+    std::fs::write(dir.path().join("readme.markdown"), "# Title").unwrap();
+    std::fs::write(dir.path().join("book.epub"), "epub data").unwrap();
+
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+    let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
+    assert_eq!(docs.len(), 4);
+
+    // Verify format normalization
+    let formats: Vec<&str> = docs.iter().map(|d| d.format.as_str()).collect();
+    assert!(formats.contains(&"Plain Text"));
+    assert!(formats.contains(&"Markdown"));
+    assert!(formats.contains(&"EPUB"));
+
+    // Count occurrences
+    let txt_count = formats.iter().filter(|&&f| f == "Plain Text").count();
+    let md_count = formats.iter().filter(|&&f| f == "Markdown").count();
+    let epub_count = formats.iter().filter(|&&f| f == "EPUB").count();
+
+    assert_eq!(txt_count, 1);
+    assert_eq!(md_count, 2); // Both .md and .markdown
+    assert_eq!(epub_count, 1);
+}
+
+#[test]
+fn test_scan_directory_sets_author_to_unknown() {
+    let dir = tempdir().unwrap();
+    std::fs::write(dir.path().join("doc.txt"), "content").unwrap();
+
+    let db = Database::new_with_path(dir.path().join("test.db")).unwrap();
+    let docs = DocumentScanner::scan_directory(dir.path(), &db).unwrap();
+    assert_eq!(docs.len(), 1);
+
+    // Verify author is set to "Unknown"
+    assert_eq!(docs[0].author, Some("Unknown".to_string()));
 }

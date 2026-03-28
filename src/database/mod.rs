@@ -61,11 +61,34 @@ impl Database {
                 path TEXT UNIQUE NOT NULL,
                 date_added TEXT NOT NULL,
                 last_opened TEXT,
-                cover_path TEXT
+                cover_path TEXT,
+                file_size_bytes INTEGER,
+                text_encoding TEXT
             );
         ",
             )
             .context("Failed to create database tables")?;
+
+        // Migration: Add new columns if they don't exist (for older databases)
+        let conn = self.conn.borrow();
+        let mut stmt = conn.prepare("PRAGMA table_info(documents)")?;
+        let columns: Vec<String> = stmt
+            .query_map([], |row| row.get::<_, String>(1))?
+            .filter_map(|r| r.ok())
+            .collect();
+
+        if !columns.contains(&"file_size_bytes".to_string()) {
+            conn.execute_batch("ALTER TABLE documents ADD COLUMN file_size_bytes INTEGER")
+                .context("Failed to add file_size_bytes column")?;
+            tracing::info!("Added file_size_bytes column to documents table");
+        }
+
+        if !columns.contains(&"text_encoding".to_string()) {
+            conn.execute_batch("ALTER TABLE documents ADD COLUMN text_encoding TEXT")
+                .context("Failed to add text_encoding column")?;
+            tracing::info!("Added text_encoding column to documents table");
+        }
+
         Ok(())
     }
 
@@ -109,12 +132,14 @@ impl Database {
         format: &str,
         path: &str,
         cover_path: Option<&str>,
+        file_size_bytes: Option<i64>,
+        text_encoding: Option<&str>,
     ) -> Result<i64> {
         let date_added = chrono::Utc::now().to_rfc3339();
         tracing::debug!(title = %title, format = %format, path = %path, "Inserting document");
         self.conn.borrow().execute(
-            "INSERT INTO documents (title, author, format, path, date_added, cover_path) VALUES (?1, ?2, ?3, ?4, ?5, ?6)",
-            params![title, author, format, path, date_added, cover_path],
+            "INSERT INTO documents (title, author, format, path, date_added, cover_path, file_size_bytes, text_encoding) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+            params![title, author, format, path, date_added, cover_path, file_size_bytes, text_encoding],
         ).with_context(|| format!("Failed to insert document '{}' at '{}'", title, path))?;
         let id = self.conn.borrow().last_insert_rowid();
         tracing::info!(id = id, title = %title, "Document inserted successfully");
@@ -140,13 +165,15 @@ impl Database {
             date_added: row.get(5)?,
             last_opened: row.get(6)?,
             cover_path: row.get(7)?,
+            file_size_bytes: row.get(8)?,
+            text_encoding: row.get(9)?,
         })
     }
 
     pub fn get_document_by_path(&self, path: &str) -> Result<Option<Document>> {
         let conn = self.conn.borrow();
         let mut stmt = conn.prepare(
-            "SELECT id, title, author, format, path, date_added, last_opened, cover_path FROM documents WHERE path = ?1"
+            "SELECT id, title, author, format, path, date_added, last_opened, cover_path, file_size_bytes, text_encoding FROM documents WHERE path = ?1"
         ).with_context(|| format!("Failed to prepare query for document path: {}", path))?;
         let mut rows = stmt
             .query(params![path])
@@ -161,7 +188,7 @@ impl Database {
     pub fn list_documents(&self) -> Result<Vec<Document>> {
         let conn = self.conn.borrow();
         let mut stmt = conn.prepare(
-            "SELECT id, title, author, format, path, date_added, last_opened, cover_path FROM documents ORDER BY last_opened DESC, date_added DESC"
+            "SELECT id, title, author, format, path, date_added, last_opened, cover_path, file_size_bytes, text_encoding FROM documents ORDER BY last_opened DESC, date_added DESC"
         )?;
         let docs = stmt.query_map([], Self::document_from_row)?;
         let mut result = Vec::new();
@@ -221,4 +248,6 @@ pub struct Document {
     pub date_added: String,
     pub last_opened: Option<String>,
     pub cover_path: Option<String>,
+    pub file_size_bytes: Option<i64>,
+    pub text_encoding: Option<String>,
 }

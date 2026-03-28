@@ -49,7 +49,7 @@
       <object class="AdwStatusPage" id="status_page">
         <property name="title" translatable="yes">No Documents</property>
         <property name="description" translatable="yes">Add documents to your library to get started</property>
-        <property name="icon-name">document-library-symbolic</property>
+        <property name="icon-name">folder-documents-symbolic</property>
       </object>
     </child>
   </template>

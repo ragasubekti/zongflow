@@ -7,4 +7,7 @@
     <file compressed="true" preprocess="xml-stripblanks">translate.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">settings.ui</file>
   </gresource>
+  <gresource prefix="/com/github/zongflow/icons/">
+    <file compressed="true">icons/com.github.zongflow.svg</file>
+  </gresource>
 </gresources>

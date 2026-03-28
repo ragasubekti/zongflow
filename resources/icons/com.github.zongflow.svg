@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#3584e4"/>
+      <stop offset="100%" style="stop-color:#1c71d8"/>
+    </linearGradient>
+    <linearGradient id="doc-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff"/>
+      <stop offset="100%" style="stop-color:#f0f0f0"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Background circle -->
+  <circle cx="64" cy="64" r="60" fill="url(#bg-gradient)"/>
+  
+  <!-- Left document -->
+  <g transform="translate(20, 25)">
+    <rect x="0" y="0" width="38" height="48" rx="3" fill="url(#doc-gradient)" stroke="#3584e4" stroke-width="1.5"/>
+    <path d="M 25 0 L 38 13 L 25 13 Z" fill="#99c1f1" stroke="#3584e4" stroke-width="1.5"/>
+    <line x1="6" y1="20" x2="32" y2="20" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6" y1="28" x2="28" y2="28" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6" y1="36" x2="24" y2="36" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Right document -->
+  <g transform="translate(70, 35)">
+    <rect x="0" y="0" width="38" height="48" rx="3" fill="url(#doc-gradient)" stroke="#3584e4" stroke-width="1.5"/>
+    <path d="M 25 0 L 38 13 L 25 13 Z" fill="#99c1f1" stroke="#3584e4" stroke-width="1.5"/>
+    <line x1="6" y1="20" x2="32" y2="20" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6" y1="28" x2="28" y2="28" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+    <line x1="6" y1="36" x2="24" y2="36" stroke="#3584e4" stroke-width="2" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Flow arrow -->
+  <path d="M 52 50 L 62 60 L 52 70" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M 62 60 L 76 60" fill="none" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+  
+  <!-- Bottom icon (gear/settings) -->
+  <g transform="translate(49, 90)">
+    <circle cx="15" cy="15" r="8" fill="none" stroke="#ffffff" stroke-width="2.5"/>
+    <path d="M 15 3 L 15 7 M 15 23 L 15 27 M 3 15 L 7 15 M 23 15 L 27 15 M 6 6 L 9 9 M 21 21 L 24 24 M 6 24 L 9 21 M 21 9 L 24 6" 
+          stroke="#ffffff" stroke-width="2.5" stroke-linecap="round"/>
+  </g>
+</svg>

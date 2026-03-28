@@ -53,7 +53,7 @@ impl ZongflowWindow {
             &library,
             Some("library"),
             &i18n::translate("LIBRARY"),
-            "document-library",
+            "folder-documents-symbolic",
         );
 
         let convert = ConvertWidget::new();
@@ -65,7 +65,7 @@ impl ZongflowWindow {
             &convert,
             Some("convert"),
             &i18n::translate("CONVERT"),
-            "exchange-positions",
+            "shuffle-symbolic",
         );
 
         let translate = TranslateWidget::new();
@@ -74,7 +74,7 @@ impl ZongflowWindow {
             &translate,
             Some("translate"),
             &i18n::translate("TRANSLATE"),
-            "language",
+            "preferences-desktop-locale-symbolic",
         );
 
         stack.set_visible_child_name("library");
